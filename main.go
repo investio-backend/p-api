@@ -8,9 +8,15 @@ import (
 	"gitlab.com/investio/backend/api/config"
 	"gitlab.com/investio/backend/api/controller"
 	"gitlab.com/investio/backend/api/model"
+	"gitlab.com/investio/backend/api/service"
 )
 
-var err error
+var (
+	err         error
+	fundService service.FundService = service.New()
+
+	fundController controller.FundController = controller.New(fundService)
+)
 
 func SetupDB() {
 	config.DB, err = gorm.Open(
@@ -33,7 +39,7 @@ func main() {
 
 	routeV0 := server.Group("/v0")
 	{
-		routeV0.GET("fund/:code", controller.GetFundByCode)
+		routeV0.GET("fund/:code", fundController.GetFundByCode)
 	}
 
 	server.Run()

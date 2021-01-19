@@ -6,14 +6,27 @@ import (
 	"gitlab.com/investio/backend/api/model"
 )
 
-func GetAllFunds(fund *[]model.Fund) (err error) {
+type FundService interface {
+	GetAllFunds(fund []*model.Fund) (err error)
+	GetFundByFundCode(fund *model.Fund, code *string) (err error)
+}
+
+type fundService struct {
+	cachedFund model.Fund
+}
+
+func New() FundService {
+	return &fundService{}
+}
+
+func (service *fundService) GetAllFunds(fund []*model.Fund) (err error) {
 	if err = config.DB.Find(fund).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
-func GetFundByFundCode(fund *model.Fund, code string) (err error) {
+func (service *fundService) GetFundByFundCode(fund *model.Fund, code *string) (err error) {
 	if err = config.DB.Where("code = ?", code).First(fund).Error; err != nil {
 		return err
 	}

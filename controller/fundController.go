@@ -8,15 +8,29 @@ import (
 	"gitlab.com/investio/backend/api/service"
 )
 
-func GetFundByCode(c *gin.Context) {
-	code := c.Params.ByName("code")
+type FundController interface {
+	GetFundByCode(ctx *gin.Context)
+}
+
+type controller struct {
+	service service.FundService
+}
+
+func New(service service.FundService) FundController {
+	return &controller{
+		service: service,
+	}
+}
+
+func (c *controller) GetFundByCode(ctx *gin.Context) {
+	code := ctx.Params.ByName("code")
 	var fund model.Fund
 
-	err := service.GetFundByFundCode(&fund, code)
+	err := c.service.GetFundByFundCode(&fund, &code)
 
 	if err != nil {
-		c.AbortWithStatus(http.StatusNotFound)
+		ctx.AbortWithStatus(http.StatusNotFound)
 	} else {
-		c.JSON(http.StatusOK, fund)
+		ctx.JSON(http.StatusOK, fund)
 	}
 }
