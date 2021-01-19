@@ -10,8 +10,6 @@ type Fund struct {
 	IsPredict        bool      `json:"is_predict"`
 	IsFnPick         bool      `json:"is_fnpick"`
 	IsDividendPayout bool      `json:"is_dividend_payout"`
-	FnRef            string    `json:"fn_ref"`
-	AimcFundRef      string    `json:"aime_fund_ref"`
 	FactsheetURL     string    `json:"factsheet_url"`
 	InvestStrategyEn string    `json:"invest_strategy_en"`
 	InvestStrategyTh string    `json:"invest_strategy_th"`
