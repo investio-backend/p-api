@@ -26,7 +26,7 @@ func (c *controller) GetFundByCode(ctx *gin.Context) {
 	code := ctx.Params.ByName("code")
 	var fund model.Fund
 
-	err := c.service.GetFundByFundCode(&fund, &code)
+	err := c.service.GetFundByFundCode(&fund, code)
 
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusNotFound)
