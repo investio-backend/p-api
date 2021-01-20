@@ -1,13 +1,15 @@
-package config
+package db
 
 import (
 	"fmt"
 	"strconv"
 
+	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
 	"github.com/jinzhu/gorm"
 )
 
-var DB *gorm.DB
+var MySQL *gorm.DB
+var InfluxClient influxdb2.Client
 
 type DbConfig struct {
 	Host     string
