@@ -1,9 +1,14 @@
 package model
 
-import "time"
+import (
+	"time"
+
+	"github.com/jinzhu/gorm"
+)
 
 type Fund struct {
-	Id               int64     `json:"id"`
+	gorm.Model
+	ID               uint32    `json:"id"`
 	Code             string    `json:"code"`
 	NameEn           string    `json:"name_en"`
 	NameTh           string    `json:"name_th"`
@@ -16,6 +21,7 @@ type Fund struct {
 	ShortDescEn      string    `json:"short_desc_en"`
 	ShortDescTh      string    `json:"short_desc_th"`
 	InceptionDate    time.Time `json:"inception_date"`
+	AmcID            uint32    `json:"amc_id"`
 	CreatedAt        time.Time `json:"created_at"`
 	UpdatedAt        time.Time `json:"updated_at"`
 }
@@ -27,6 +33,7 @@ type Fund struct {
 // 	NameTh           string    `json:"name_th"`
 // }
 
+// TableName fund
 func (b *Fund) TableName() string {
 	return "fund"
 }
