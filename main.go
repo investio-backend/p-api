@@ -44,9 +44,10 @@ func setupDB() {
 	db.MySQL.AutoMigrate(&model.Fund{})
 
 	db.InfluxClient = influxdb2.NewClient(
-		os.Getenv("INFLUX_HOST")+":"+os.Getenv("INFLUX_PORT"),
+		"http://"+os.Getenv("INFLUX_HOST")+":"+os.Getenv("INFLUX_PORT"),
 		os.Getenv("INFLUX_TOKEN"),
 	)
+	db.InfluxQuery = db.InfluxClient.QueryAPI("Investio")
 }
 
 func main() {
@@ -66,7 +67,7 @@ func main() {
 	routeV0 := server.Group("/v0")
 	{
 		routeV0.GET("funds/:code", fundController.GetFundByCode)
-		routeV0.GET("navs/:code", nil)
+		routeV0.GET("navs/:code", navController.GetPastNavSeries)
 	}
 
 	server.Run(":" + os.Getenv("API_PORT"))

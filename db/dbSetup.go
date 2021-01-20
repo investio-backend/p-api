@@ -5,11 +5,16 @@ import (
 	"strconv"
 
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
+	"github.com/influxdata/influxdb-client-go/v2/api"
+
 	"github.com/jinzhu/gorm"
 )
 
-var MySQL *gorm.DB
-var InfluxClient influxdb2.Client
+var (
+	MySQL        *gorm.DB
+	InfluxClient influxdb2.Client
+	InfluxQuery  api.QueryAPI
+)
 
 type DbConfig struct {
 	Host     string
