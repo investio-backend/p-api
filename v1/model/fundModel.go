@@ -37,3 +37,11 @@ type Fund struct {
 func (b *Fund) TableName() string {
 	return "fund"
 }
+
+// FundSearch search model
+type FundSearch struct {
+	ID     uint32 `json:"id"`
+	Code   string `json:"code"`
+	NameEn string `json:"name_en"`
+	NameTh string `json:"name_th"`
+}

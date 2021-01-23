@@ -5,9 +5,9 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"gitlab.com/investio/backend/api/model"
-	"gitlab.com/investio/backend/api/request"
-	"gitlab.com/investio/backend/api/service"
+	"gitlab.com/investio/backend/api/v1/model"
+	"gitlab.com/investio/backend/api/v1/request"
+	"gitlab.com/investio/backend/api/v1/service"
 )
 
 type NavController interface {

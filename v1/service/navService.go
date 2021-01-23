@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"gitlab.com/investio/backend/api/db"
-	"gitlab.com/investio/backend/api/model"
+	"gitlab.com/investio/backend/api/v1/model"
 )
 
 type NavService interface {
@@ -14,15 +14,8 @@ type NavService interface {
 }
 
 type navService struct {
-	// influxdb2.QueryAPI queryAPI
-	// queryAPI api.QueryAPI
+	//
 }
-
-// func NewNavService(queryApi api.QueryAPI) NavService {
-// 	return &navService{
-// 		queryAPI: queryApi,
-// 	}
-// }
 
 func NewNavService() NavService {
 	return &navService{}

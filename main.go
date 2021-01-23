@@ -9,19 +9,20 @@ import (
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
 	"github.com/jinzhu/gorm"
 	"github.com/joho/godotenv"
-	"gitlab.com/investio/backend/api/controller"
 	"gitlab.com/investio/backend/api/db"
-	"gitlab.com/investio/backend/api/model"
-	"gitlab.com/investio/backend/api/service"
+	"gitlab.com/investio/backend/api/v1/controller"
+	"gitlab.com/investio/backend/api/v1/model"
+	"gitlab.com/investio/backend/api/v1/service"
+	"gopkg.in/olahol/melody.v1"
 )
 
 var (
 	err error
 
-	fundService service.FundService = service.New()
+	fundService service.FundService = service.NewFundService()
 	navService  service.NavService  = service.NewNavService()
 
-	fundController controller.FundController = controller.New(fundService)
+	fundController controller.FundController = controller.NewFundController(fundService, melody.New())
 	navController  controller.NavController  = controller.NewNavController(navService)
 )
 
@@ -60,14 +61,19 @@ func main() {
 	defer db.MySQL.Close()
 	defer db.InfluxClient.Close()
 
-	fmt.Printf("Type: %T", db.MySQL)
+	// fmt.Printf("Type: %T", db.MySQL)
 
 	server := gin.Default()
 
-	routeV0 := server.Group("/v0")
+	v1 := server.Group("/v1")
 	{
-		routeV0.GET("funds/:code", fundController.GetFundByCode)
-		routeV0.GET("navs/:code", navController.GetPastNavSeries)
+		v1.GET("funds/:id", fundController.GetFundByID)
+		v1.GET("navs/:code", navController.GetPastNavSeries)
+
+		ws := v1.Group("/ws")
+		{
+			ws.GET("fund", fundController.HandleSocket)
+		}
 	}
 
 	server.Run(":" + os.Getenv("API_PORT"))
