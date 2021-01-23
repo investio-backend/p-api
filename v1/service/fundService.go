@@ -3,7 +3,6 @@ package service
 import (
 	"fmt"
 
-	_ "github.com/go-sql-driver/mysql"
 	"gitlab.com/investio/backend/api/db"
 	"gitlab.com/investio/backend/api/v1/model"
 	"gopkg.in/olahol/melody.v1"
@@ -11,15 +10,15 @@ import (
 
 type FundService interface {
 	GetAllFunds(fund *[]model.Fund) (err error)
-	SearchFundByFundCode(fund *[]model.FundSearch, code string) (err error)
 	GetFundByID(fund *model.Fund, fundID string) error
-	HandleConnect(s *melody.Session)
+	HandleWsConnect(s *melody.Session)
+	SearchFund(query string) (result []model.FundSearchResponse, err error)
 }
 
 type fundService struct {
-	cachedFund model.Fund
 }
 
+// NewFundService - A constuctor of FundService
 func NewFundService() FundService {
 	return &fundService{}
 }
@@ -38,20 +37,25 @@ func (service *fundService) GetFundByID(fund *model.Fund, fundID string) error {
 	return nil
 }
 
-func (service *fundService) SearchFundByFundCode(funds *[]model.FundSearch, code string) (err error) {
-	if err = db.MySQL.Where("code LIKE ?", "%"+code+"%").Find(funds).Error; err != nil {
-		return err
-	}
-	return nil
-}
-
-func (service *fundService) SearchFundByNameEn(funds *[]model.FundSearch, query string) (err error) {
-	if err = db.MySQL.Where("name_en LIKE ?", "%"+query+"%").Find(&funds).Error; err != nil {
-		return err
-	}
-	return nil
-}
-
-func (service *fundService) HandleConnect(s *melody.Session) {
+func (service *fundService) HandleWsConnect(s *melody.Session) {
 	fmt.Println("Connected: " + s.Request.Host)
+}
+
+func (service *fundService) SearchFund(query string) (result []model.FundSearchResponse, err error) {
+	err = service.searchFundByFundCode(&result, query)
+	return
+}
+
+func (service *fundService) searchFundByFundCode(funds *[]model.FundSearchResponse, code string) (err error) {
+	if err = db.MySQL.Limit(5).Where("code LIKE ?", "%"+code+"%").Find(funds).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (service *fundService) searchFundByNameEn(funds *[]model.FundSearchResponse, name string) (err error) {
+	if err = db.MySQL.Where("name_en LIKE ?", "%"+name+"%").Find(&funds).Error; err != nil {
+		return err
+	}
+	return nil
 }

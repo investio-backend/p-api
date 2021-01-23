@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
+	_ "github.com/go-sql-driver/mysql"
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
 	"github.com/jinzhu/gorm"
 	"github.com/joho/godotenv"
@@ -17,16 +18,16 @@ import (
 )
 
 var (
-	err error
+	fundWs *melody.Melody = melody.New()
 
 	fundService service.FundService = service.NewFundService()
 	navService  service.NavService  = service.NewNavService()
 
-	fundController controller.FundController = controller.NewFundController(fundService, melody.New())
+	fundController controller.FundController = controller.NewFundController(fundService, fundWs)
 	navController  controller.NavController  = controller.NewNavController(navService)
 )
 
-func setupDB() {
+func setupDB() (err error) {
 	db.MySQL, err = gorm.Open(
 		"mysql",
 		db.MySqlURL(db.BuildDbConfig(
@@ -40,24 +41,31 @@ func setupDB() {
 
 	if err != nil {
 		fmt.Println("Database Status: ", err)
+	} else {
+		db.MySQL.AutoMigrate(&model.Fund{})
+
+		db.InfluxClient = influxdb2.NewClient(
+			"http://"+os.Getenv("INFLUX_HOST")+":"+os.Getenv("INFLUX_PORT"),
+			os.Getenv("INFLUX_TOKEN"),
+		)
+		db.InfluxQuery = db.InfluxClient.QueryAPI("Investio")
 	}
-
-	db.MySQL.AutoMigrate(&model.Fund{})
-
-	db.InfluxClient = influxdb2.NewClient(
-		"http://"+os.Getenv("INFLUX_HOST")+":"+os.Getenv("INFLUX_PORT"),
-		os.Getenv("INFLUX_TOKEN"),
-	)
-	db.InfluxQuery = db.InfluxClient.QueryAPI("Investio")
+	return
 }
 
 func main() {
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
+		return
 	}
 
-	setupDB()
+	err = setupDB()
+	if err != nil {
+		log.Fatal("Fail to connect to DB: ", err.Error())
+		return
+	}
+
 	defer db.MySQL.Close()
 	defer db.InfluxClient.Close()
 
@@ -72,7 +80,7 @@ func main() {
 
 		ws := v1.Group("/ws")
 		{
-			ws.GET("fund", fundController.HandleSocket)
+			ws.GET(":clientID/fund", fundController.HandleSocket)
 		}
 	}
 

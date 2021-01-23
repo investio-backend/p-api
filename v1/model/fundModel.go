@@ -26,22 +26,19 @@ type Fund struct {
 	UpdatedAt        time.Time `json:"updated_at"`
 }
 
-// type FundBriefInfo struct {
-// 	Id int64 `json:"id"`
-// 	Code string `json:"code"`
-// 	NameEn           string    `json:"name_en"`
-// 	NameTh           string    `json:"name_th"`
-// }
-
-// TableName fund
-func (b *Fund) TableName() string {
-	return "fund"
-}
-
-// FundSearch search model
-type FundSearch struct {
+// FundSearchResponse - ws
+type FundSearchResponse struct {
 	ID     uint32 `json:"id"`
 	Code   string `json:"code"`
 	NameEn string `json:"name_en"`
 	NameTh string `json:"name_th"`
+}
+
+// TableName TODO change to funds
+func (Fund) TableName() string {
+	return "fund"
+}
+
+func (FundSearchResponse) TableName() string {
+	return "fund"
 }
