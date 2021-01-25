@@ -18,13 +18,15 @@ import (
 )
 
 var (
-	fundWs *melody.Melody = melody.New()
+	ws *melody.Melody = melody.New()
 
 	fundService service.FundService = service.NewFundService()
 	navService  service.NavService  = service.NewNavService()
 
-	fundController controller.FundController = controller.NewFundController(fundService, fundWs)
+	fundController controller.FundController = controller.NewFundController(fundService)
 	navController  controller.NavController  = controller.NewNavController(navService)
+
+	wsController controller.SocketController = controller.NewSocketController(ws, fundService)
 )
 
 func setupDB() (err error) {
@@ -80,7 +82,7 @@ func main() {
 
 		ws := v1.Group("/ws")
 		{
-			ws.GET(":clientID/fund", fundController.HandleSocket)
+			ws.GET(":clientID/fund", wsController.HandleSocket)
 		}
 	}
 
