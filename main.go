@@ -5,15 +5,16 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
-	_ "github.com/go-sql-driver/mysql"
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
-	"github.com/jinzhu/gorm"
+	"gorm.io/driver/mysql"
+
 	"github.com/joho/godotenv"
 	"gitlab.com/investio/backend/api/db"
 	"gitlab.com/investio/backend/api/v1/controller"
 	"gitlab.com/investio/backend/api/v1/model"
 	"gitlab.com/investio/backend/api/v1/service"
 	"gopkg.in/olahol/melody.v1"
+	"gorm.io/gorm"
 )
 
 var (
@@ -30,15 +31,27 @@ var (
 
 func setupDB() (err error) {
 	db.MySQL, err = gorm.Open(
-		"mysql",
-		db.MySqlURL(db.BuildDbConfig(
-			os.Getenv("MYSQL_HOST"),
-			os.Getenv("MYSQL_PORT"),
-			os.Getenv("MYSQL_USER"),
-			os.Getenv("MYSQL_PWD"),
-			os.Getenv("MYSQL_DB"),
-		)),
+		mysql.Open(
+			db.MySqlURL(db.BuildDbConfig(
+				os.Getenv("MYSQL_HOST"),
+				os.Getenv("MYSQL_PORT"),
+				os.Getenv("MYSQL_USER"),
+				os.Getenv("MYSQL_PWD"),
+				os.Getenv("MYSQL_DB"),
+			)),
+		),
+		&gorm.Config{},
 	)
+	// db.MySQL, err = gorm.Open(
+	// 	"mysql",
+	// 	db.MySqlURL(db.BuildDbConfig(
+	// 		os.Getenv("MYSQL_HOST"),
+	// 		os.Getenv("MYSQL_PORT"),
+	// 		os.Getenv("MYSQL_USER"),
+	// 		os.Getenv("MYSQL_PWD"),
+	// 		os.Getenv("MYSQL_DB"),
+	// 	)),
+	// )
 
 	if err != nil {
 		log.Fatalln("Database Init error: ", err)
@@ -67,7 +80,7 @@ func main() {
 		return
 	}
 
-	defer db.MySQL.Close()
+	// defer db.MySQL.Close()
 	defer db.InfluxClient.Close()
 
 	// fmt.Printf("Type: %T", db.MySQL)

@@ -10,4 +10,6 @@ require (
 	github.com/jinzhu/gorm v1.9.16
 	github.com/joho/godotenv v1.3.0
 	gopkg.in/olahol/melody.v1 v1.0.0-20170518105555-d52139073376
+	gorm.io/driver/mysql v1.0.4 // indirect
+	gorm.io/gorm v1.20.12
 )
