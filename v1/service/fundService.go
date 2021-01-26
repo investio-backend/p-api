@@ -7,7 +7,7 @@ import (
 
 type FundService interface {
 	GetAllFunds(fund *[]model.Fund) (err error)
-	GetFundByID(fund *model.Fund, fundID string) error
+	GetFundInfoByID(fund *model.Fund, fundID string) error
 	SearchFund(query string) (result []model.FundSearchResponse, err error)
 }
 
@@ -26,7 +26,7 @@ func (service *fundService) GetAllFunds(fund *[]model.Fund) (err error) {
 	return nil
 }
 
-func (service *fundService) GetFundByID(fund *model.Fund, fundID string) error {
+func (service *fundService) GetFundInfoByID(fund *model.Fund, fundID string) error {
 	if err := db.MySQL.Where("id = ?", fundID).First(&fund).Error; err != nil {
 		return err
 	}
@@ -39,7 +39,7 @@ func (service *fundService) SearchFund(query string) (result []model.FundSearchR
 }
 
 func (service *fundService) searchFundByFundCode(funds *[]model.FundSearchResponse, code string) (err error) {
-	if err = db.MySQL.Limit(5).Where("code LIKE ?", "%"+code+"%").Find(funds).Error; err != nil {
+	if err = db.MySQL.Limit(5).Where("code LIKE ?", "%"+code+"%").Find(&funds).Error; err != nil {
 		return err
 	}
 	return nil
