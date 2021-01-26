@@ -25,7 +25,7 @@ var (
 	fundController controller.FundController = controller.NewFundController(fundService)
 	navController  controller.NavController  = controller.NewNavController(navService)
 
-	wsController controller.SocketController = controller.NewSocketController(ws, fundService)
+	wsController controller.SocketController = controller.NewSocketController(ws, fundController)
 )
 
 func setupDB() (err error) {
