@@ -2,6 +2,7 @@ package db
 
 import (
 	"fmt"
+	"log"
 	"strconv"
 
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
@@ -25,13 +26,13 @@ type DbConfig struct {
 }
 
 func BuildDbConfig(host string, port string, user, pwd, dbName string) *DbConfig {
-	port_uint, err := strconv.ParseUint(port, 10, 32)
+	portUint, err := strconv.ParseUint(port, 10, 32)
 	if err != nil {
-		fmt.Println(err)
+		log.Fatalln("Build DB Config: ", err)
 	}
 	dbConfig := DbConfig{
 		Host:     host,
-		Port:     port_uint,
+		Port:     portUint,
 		User:     user,
 		Password: pwd,
 		DbName:   dbName,

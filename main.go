@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 
@@ -42,7 +41,7 @@ func setupDB() (err error) {
 	)
 
 	if err != nil {
-		fmt.Println("Database Status: ", err)
+		log.Fatalln("Database Init error: ", err)
 	} else {
 		db.MySQL.AutoMigrate(&model.Fund{})
 
