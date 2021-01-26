@@ -48,17 +48,29 @@ func (c *socketController) handleWsMessage(s *melody.Session, query []byte) {
 		response []byte
 	)
 	json.Unmarshal(query, &reqJSON)
+	reqType := strings.ToUpper(reqJSON.Type)
 	reqTopic := strings.ToLower(reqJSON.Topic)
 
-	if reqTopic == "search" {
-		funds, err := c.fundService.SearchFund(reqJSON.Data)
-		if err != nil {
-			// panic(err)
-			log.Fatal(err)
-			response = []byte("Failed: Database " + err.Error())
-		} else {
-			response, _ = json.Marshal(funds)
-			fmt.Println(reqJSON.Topic, reqJSON.Data)
+	if reqType == "FUND" {
+		if reqTopic == "search" {
+			funds, err := c.fundService.SearchFund(reqJSON.Data)
+			if err != nil {
+				// panic(err)
+				log.Fatal(err)
+				errResponse := &dto.SocketDTO{
+					Type:  "ERROR",
+					Topic: "Database",
+					Data:  err.Error(),
+				}
+				response, err = json.Marshal(errResponse)
+				if err != nil {
+					log.Fatal("Marshall DB Fail:" + err.Error())
+				}
+				// response = []byte("Failed: Database " + err.Error())
+			} else {
+				response, _ = json.Marshal(funds)
+				fmt.Println(reqJSON.Topic, reqJSON.Data)
+			}
 		}
 	}
 
