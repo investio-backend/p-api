@@ -1,17 +1,13 @@
 package service
 
 import (
-	"fmt"
-
 	"gitlab.com/investio/backend/api/db"
 	"gitlab.com/investio/backend/api/v1/model"
-	"gopkg.in/olahol/melody.v1"
 )
 
 type FundService interface {
 	GetAllFunds(fund *[]model.Fund) (err error)
 	GetFundByID(fund *model.Fund, fundID string) error
-	HandleWsConnect(s *melody.Session)
 	SearchFund(query string) (result []model.FundSearchResponse, err error)
 }
 
@@ -35,10 +31,6 @@ func (service *fundService) GetFundByID(fund *model.Fund, fundID string) error {
 		return err
 	}
 	return nil
-}
-
-func (service *fundService) HandleWsConnect(s *melody.Session) {
-	fmt.Println("Connected: " + s.Request.Host)
 }
 
 func (service *fundService) SearchFund(query string) (result []model.FundSearchResponse, err error) {

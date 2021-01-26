@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"gitlab.com/investio/backend/api/v1/request"
+	"gitlab.com/investio/backend/api/v1/dto"
 	"gitlab.com/investio/backend/api/v1/service"
 	"gopkg.in/olahol/melody.v1"
 )
@@ -38,13 +38,13 @@ func (c *socketController) HandleSocket(ctx *gin.Context) {
 }
 
 func (c *socketController) initWebsocket() {
-	c.melody.HandleConnect(c.fundService.HandleWsConnect)
+	c.melody.HandleConnect(c.handleWsConnected)
 	c.melody.HandleMessage(c.handleWsMessage)
 }
 
 func (c *socketController) handleWsMessage(s *melody.Session, query []byte) {
 	var (
-		reqJSON  request.SocketJSON
+		reqJSON  dto.SocketDTO
 		response []byte
 	)
 	json.Unmarshal(query, &reqJSON)
@@ -65,4 +65,8 @@ func (c *socketController) handleWsMessage(s *melody.Session, query []byte) {
 	c.melody.BroadcastFilter(response, func(q *melody.Session) bool {
 		return q.Request.URL.Path == s.Request.URL.Path
 	})
+}
+
+func (c *socketController) handleWsConnected(s *melody.Session) {
+	fmt.Println("Connected: " + s.Request.Host)
 }

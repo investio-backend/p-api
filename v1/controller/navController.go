@@ -5,8 +5,8 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"gitlab.com/investio/backend/api/v1/dto"
 	"gitlab.com/investio/backend/api/v1/model"
-	"gitlab.com/investio/backend/api/v1/request"
 	"gitlab.com/investio/backend/api/v1/service"
 )
 
@@ -26,7 +26,7 @@ func NewNavController(service service.NavService) NavController {
 
 func (c *navController) GetPastNavSeries(ctx *gin.Context) {
 	var pastNav []model.NavDate
-	var req request.PastNavRequest
+	var req dto.PastNavDTO
 
 	code := ctx.Params.ByName("code")
 
