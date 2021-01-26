@@ -82,7 +82,7 @@ func main() {
 
 		ws := v1.Group("/ws")
 		{
-			ws.GET(":clientID/fund", wsController.HandleSocket)
+			ws.GET(":clientID", wsController.HandleSocket)
 		}
 	}
 
