@@ -10,6 +10,7 @@ import (
 	"gitlab.com/investio/backend/api/v1/service"
 )
 
+// NavController manages NAV
 type NavController interface {
 	GetPastNavSeries(ctx *gin.Context)
 }
@@ -18,6 +19,7 @@ type navController struct {
 	service service.NavService
 }
 
+// NewNavController - A constructor of NavController
 func NewNavController(service service.NavService) NavController {
 	return &navController{
 		service: service,

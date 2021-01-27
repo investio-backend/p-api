@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	"regexp"
 
 	"github.com/gin-gonic/gin"
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
@@ -18,14 +19,15 @@ import (
 )
 
 var (
-	ws *melody.Melody = melody.New()
+	thaiRegEx, _ = regexp.Compile("([\u0E00-\u0E7F]+)")
 
-	fundService service.FundService = service.NewFundService()
+	fundService service.FundService = service.NewFundService(thaiRegEx)
 	navService  service.NavService  = service.NewNavService()
 
 	fundController controller.FundController = controller.NewFundController(fundService)
 	navController  controller.NavController  = controller.NewNavController(navService)
 
+	ws           *melody.Melody              = melody.New()
 	wsController controller.SocketController = controller.NewSocketController(ws, fundController)
 )
 
@@ -68,6 +70,8 @@ func setupDB() (err error) {
 }
 
 func main() {
+	// thaiRegx := regexp.Compile("")
+
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")

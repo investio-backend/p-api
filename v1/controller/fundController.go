@@ -12,6 +12,7 @@ import (
 	"gitlab.com/investio/backend/api/v1/service"
 )
 
+// FundController manages fund
 type FundController interface {
 	GetFundByID(ctx *gin.Context)
 	SearchFund(reqJSON dto.SocketDTO) (response []byte)
@@ -29,8 +30,9 @@ func NewFundController(service service.FundService) FundController {
 }
 
 func (c *fundController) SearchFund(reqJSON dto.SocketDTO) (response []byte) {
-	funds, err := c.fundService.SearchFund(reqJSON.Data)
-	fmt.Println("Search: ", funds)
+	LIMIT := 5
+	funds, err := c.fundService.SearchFund(reqJSON.Data, LIMIT)
+	// fmt.Println("Search: ", funds)
 	if err != nil {
 		// panic(err)
 		log.Fatal(err)
@@ -44,10 +46,10 @@ func (c *fundController) SearchFund(reqJSON dto.SocketDTO) (response []byte) {
 			log.Fatal("Marshall DB Fail:" + err.Error())
 		}
 		// response = []byte("Failed: Database " + err.Error())
-	} else {
+	} else if len(funds) > 0 {
 		// fundsData, _ := json.Marshal(funds)
 		dataR := &dto.SocketArrayDTO{
-			Type:  "FundRes",
+			Type:  "FUNDRES",
 			Topic: "search",
 			Data:  funds,
 		}
@@ -59,7 +61,7 @@ func (c *fundController) SearchFund(reqJSON dto.SocketDTO) (response []byte) {
 
 func (c *fundController) GetFundByID(ctx *gin.Context) {
 	code := ctx.Params.ByName("id")
-	var fund model.Fund
+	var fund model.FundAllInfo
 
 	err := c.fundService.GetFundInfoByID(&fund, code)
 

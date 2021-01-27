@@ -10,6 +10,7 @@ import (
 	"gopkg.in/olahol/melody.v1"
 )
 
+// SocketController manages websocket
 type SocketController interface {
 	HandleSocket(ctx *gin.Context)
 }
@@ -55,9 +56,11 @@ func (c *socketController) handleWsMessage(s *melody.Session, query []byte) {
 		}
 	}
 
-	c.melody.BroadcastFilter(response, func(q *melody.Session) bool {
-		return q.Request.URL.Path == s.Request.URL.Path
-	})
+	if response != nil {
+		c.melody.BroadcastFilter(response, func(q *melody.Session) bool {
+			return q.Request.URL.Path == s.Request.URL.Path
+		})
+	}
 }
 
 func (c *socketController) handleWsConnected(s *melody.Session) {
