@@ -64,7 +64,7 @@ func setupDB() (err error) {
 			"http://"+os.Getenv("INFLUX_HOST")+":"+os.Getenv("INFLUX_PORT"),
 			os.Getenv("INFLUX_TOKEN"),
 		)
-		db.InfluxQuery = db.InfluxClient.QueryAPI("Investio")
+		db.InfluxQuery = db.InfluxClient.QueryAPI(os.Getenv("INFLUX_ORG"))
 	}
 	return
 }

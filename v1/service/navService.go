@@ -26,7 +26,7 @@ func (s *navService) GetPastNavByFundCode(navList *[]model.NavDate, fundCode, da
 		context.Background(),
 		`from(bucket:"fund-3Y")
 		|> range(start: -`+dataRange+`)
-		|> filter(fn: (r) => r._field == "value"
+		|> filter(fn: (r) => r._field == "nav"
 			and r.fund_code == "`+fundCode+`")`)
 
 	if err != nil {
