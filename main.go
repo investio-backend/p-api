@@ -94,7 +94,8 @@ func main() {
 	v1 := server.Group("/v1")
 	{
 		v1.GET("funds/:id", fundController.GetFundByID)
-		v1.GET("navs/:code", navController.GetPastNavSeries)
+		v1.GET("funds/:id/nav", navController.GetPastNavSeries)
+		v1.GET("funds/:id/nav/latest", navController.GetLatestNav)
 
 		ws := v1.Group("/ws")
 		{

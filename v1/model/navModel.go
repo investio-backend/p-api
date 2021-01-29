@@ -6,6 +6,6 @@ type NavDate struct {
 }
 
 type NavSeries struct {
-	FundCode string    `json:"fund_code"`
-	Navs     []NavDate `json:"navs"`
+	FundID int32     `json:"fund_id"`
+	Navs   []NavDate `json:"navs"`
 }
