@@ -8,6 +8,7 @@ import (
 
 type Fund struct {
 	ID               uint32         `json:"id"`
+	FundID           uint32         `json:"fund_id"`
 	Code             string         `json:"code"`
 	NameEn           string         `json:"name_en"`
 	NameTh           string         `json:"name_th"`
@@ -28,14 +29,14 @@ type Fund struct {
 
 // FundSearchResponse - ws
 type FundSearchResponse struct {
-	ID     uint32 `json:"id"`
+	FundID uint32 `json:"fund_id"`
 	Code   string `json:"code"`
 	NameEn string `json:"name_en"`
 	NameTh string `json:"name_th"`
 }
 
 type FundAllInfo struct {
-	ID               uint32    `json:"id"`
+	FundID           uint32    `json:"fund_id"`
 	Code             string    `json:"code"`
 	NameEn           string    `json:"name_en"`
 	NameTh           string    `json:"name_th"`

@@ -32,7 +32,7 @@ func (service *fundService) GetAllFunds(funds *[]model.FundAllInfo) (err error) 
 }
 
 func (service *fundService) GetFundInfoByID(fund *model.FundAllInfo, fundID string) error {
-	if err := db.MySQL.Where("id = ?", fundID).First(&fund).Error; err != nil {
+	if err := db.MySQL.Where("fund_id = ?", fundID).First(&fund).Error; err != nil {
 		return err
 	}
 	return nil
