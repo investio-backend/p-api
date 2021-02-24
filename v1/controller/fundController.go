@@ -2,6 +2,7 @@ package controller
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -10,11 +11,13 @@ import (
 	"gitlab.com/investio/backend/api/v1/dto"
 	"gitlab.com/investio/backend/api/v1/model"
 	"gitlab.com/investio/backend/api/v1/service"
+	"gorm.io/gorm"
 )
 
 // FundController manages fund
 type FundController interface {
 	GetFundByID(ctx *gin.Context)
+	// GetAllFund(ctx *gin.Context)
 	SearchFund(reqJSON dto.SocketDTO) (response []byte)
 }
 
@@ -68,7 +71,12 @@ func (c *fundController) GetFundByID(ctx *gin.Context) {
 	fmt.Println(fund)
 
 	if err != nil {
-		ctx.AbortWithStatus(http.StatusNotFound)
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			ctx.AbortWithStatus(http.StatusNotFound)
+		} else {
+			ctx.AbortWithStatus(http.StatusBadGateway)
+		}
+
 	} else {
 		ctx.JSON(http.StatusOK, fund)
 	}
