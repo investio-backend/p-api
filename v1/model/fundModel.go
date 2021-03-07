@@ -7,21 +7,22 @@ import (
 )
 
 type Fund struct {
-	ID               uint32         `json:"id"`
-	FundID           uint32         `json:"fund_id"`
-	Code             string         `json:"code"`
-	NameEn           string         `json:"name_en"`
-	NameTh           string         `json:"name_th"`
-	IsPredict        bool           `json:"is_predict"`
-	IsFnpick         bool           `json:"is_fnpick"`
-	IsDividendPayout bool           `json:"is_dividend_payout"`
-	FactsheetURL     string         `json:"factsheet_url"`
-	InvestStrategyEn string         `json:"invest_strategy_en"`
-	InvestStrategyTh string         `json:"invest_strategy_th"`
-	ShortDescEn      string         `json:"short_desc_en"`
-	ShortDescTh      string         `json:"short_desc_th"`
-	InceptionDate    time.Time      `json:"inception_date"`
-	AmcID            uint32         `json:"amc_id"`
+	ID               uint16    `json:"id"`
+	FundID           string    `json:"fund_id"`
+	Code             string    `json:"code"`
+	NameEn           string    `json:"name_en"`
+	NameTh           string    `json:"name_th"`
+	IsPredict        bool      `json:"is_predict"`
+	IsFnpick         bool      `json:"is_fnpick"`
+	IsDividendPayout bool      `json:"is_dividend_payout"`
+	FactsheetURL     string    `json:"factsheet_url"`
+	InvestStrategyEn string    `json:"invest_strategy_en"`
+	InvestStrategyTh string    `json:"invest_strategy_th"`
+	ShortDescEn      string    `json:"short_desc_en"`
+	ShortDescTh      string    `json:"short_desc_th"`
+	InceptionDate    time.Time `json:"inception_date"`
+	AmcID            uint32    `json:"amc_id"`
+	Stat             Stat
 	CreatedAt        time.Time      `json:"created_at"`
 	UpdatedAt        time.Time      `json:"updated_at"`
 	DeletedAt        gorm.DeletedAt `gorm:"index"`
@@ -29,14 +30,14 @@ type Fund struct {
 
 // FundSearchResponse - ws
 type FundSearchResponse struct {
-	FundID uint32 `json:"fund_id"`
+	FundID string `json:"fund_id"`
 	Code   string `json:"code"`
 	NameEn string `json:"name_en"`
 	NameTh string `json:"name_th"`
 }
 
 type FundAllInfo struct {
-	FundID           uint32    `json:"fund_id"`
+	FundID           string    `json:"fund_id"`
 	Code             string    `json:"code"`
 	NameEn           string    `json:"name_en"`
 	NameTh           string    `json:"name_th"`
