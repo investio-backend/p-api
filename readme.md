@@ -8,6 +8,6 @@ $ go run main.go
 To build a docker image
 ```bash
 $ docker build . -t dewkul/inv-api
-$ docker tag [imageTag] dewkul/inv-api:[version]
-$ docker push [username]/inv-api:[version]
+$ docker tag dewkul/inv-api dewkul/inv-api:[version]
+$ docker push dewkul/inv-api:[version]
 ```
