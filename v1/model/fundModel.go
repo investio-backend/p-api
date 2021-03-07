@@ -50,6 +50,7 @@ type FundAllInfo struct {
 	ShortDescEn      string    `json:"short_desc_en"`
 	ShortDescTh      string    `json:"short_desc_th"`
 	InceptionDate    time.Time `json:"inception_date"`
+	AmcNameEn        string    `json:"amc_name_en"`
 }
 
 // TableName fund

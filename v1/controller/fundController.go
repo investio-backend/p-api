@@ -19,6 +19,7 @@ type FundController interface {
 	GetFundByID(ctx *gin.Context)
 	// GetAllFund(ctx *gin.Context)
 	SearchFund(reqJSON dto.SocketDTO) (response []byte)
+	GetTopReturn(ctx *gin.Context)
 }
 
 type fundController struct {
@@ -68,8 +69,6 @@ func (c *fundController) GetFundByID(ctx *gin.Context) {
 
 	err := c.fundService.GetFundInfoByID(&fund, code)
 
-	fmt.Println(fund)
-
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			ctx.AbortWithStatus(http.StatusNotFound)
@@ -78,6 +77,18 @@ func (c *fundController) GetFundByID(ctx *gin.Context) {
 		}
 
 	} else {
+		fmt.Println(fund)
 		ctx.JSON(http.StatusOK, fund)
+	}
+}
+
+func (c *fundController) GetTopReturn(ctx *gin.Context) {
+	var statRes []model.Stat
+	if err := c.fundService.FindTopReturn(&statRes); err != nil {
+		// fmt.Println("Return Err: ", err)
+		ctx.AbortWithStatus(http.StatusBadRequest)
+	} else {
+		// fmt.Println("Res: ", statRes)
+		ctx.JSON(http.StatusOK, statRes)
 	}
 }

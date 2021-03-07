@@ -11,6 +11,7 @@ type FundService interface {
 	GetAllFunds(fund *[]model.FundAllInfo) (err error)
 	GetFundInfoByID(fund *model.FundAllInfo, fundID string) error
 	SearchFund(query string, limit int) (result []model.FundSearchResponse, err error)
+	FindTopReturn(stats *[]model.Stat) (err error)
 }
 
 type fundService struct {
@@ -36,6 +37,7 @@ func (service *fundService) GetFundInfoByID(fund *model.FundAllInfo, fundID stri
 		return err
 	}
 	return nil
+	// if err := db.MySQL.Joins("JOIN")
 }
 
 func (service *fundService) SearchFund(query string, limit int) (result []model.FundSearchResponse, err error) {
@@ -69,6 +71,19 @@ func (service *fundService) searchFundByNameEN(funds *[]model.FundSearchResponse
 
 func (service *fundService) searchFundByNameTH(funds *[]model.FundSearchResponse, name string, limit int) (err error) {
 	if err = db.MySQL.Limit(limit).Where("name_th LIKE ?", "%"+name+"%").Find(&funds).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (service *fundService) FindTopReturn(stats *[]model.Stat) (err error) {
+	// var fund model.Fund
+	// if err = db.MySQL.Model(&fund).Association("Stat").Error; err != nil {
+	// 	return err
+	// }
+	// db.MySQL.Model(&fund).Limit(50).Order("total_return_1y desc").Association("Stat").Find(&stats)
+	// return nil
+	if err = db.MySQL.Limit(50).Order("total_return_1y desc").Find(&stats).Error; err != nil {
 		return err
 	}
 	return nil
