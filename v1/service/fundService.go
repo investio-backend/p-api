@@ -11,6 +11,7 @@ type FundService interface {
 	GetAllFunds(fund *[]model.FundAllInfo) (err error)
 	GetAllCat(aimc_cats *[]model.AimcCat) (err error)
 	GetAllBrdCat(cats *[]model.AimcBrdCat) (err error)
+	GetAllAmc(amc *[]model.Amc) (err error)
 	GetFundInfoByID(fund *model.FundAllInfo, fundID string) error
 	SearchFund(query string, limit int) (result []model.FundSearchResponse, err error)
 	FindTopReturn(stats *[]model.Stat_1Y, catID string, amcCode string, duration string) (err error)
@@ -43,6 +44,13 @@ func (service *fundService) GetAllCat(aimc_cats *[]model.AimcCat) (err error) {
 
 func (service *fundService) GetAllBrdCat(cats *[]model.AimcBrdCat) (err error) {
 	if err = db.MySQL.Find(&cats).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (service *fundService) GetAllAmc(amc *[]model.Amc) (err error) {
+	if err = db.MySQL.Find(&amc).Error; err != nil {
 		return err
 	}
 	return nil

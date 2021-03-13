@@ -16,7 +16,8 @@ import (
 // FundController manages fund
 type FundController interface {
 	GetFundByID(ctx *gin.Context)
-	GetAllCat(ctx *gin.Context)
+	ListCat(ctx *gin.Context)
+	ListAmc(ctx *gin.Context)
 	// GetAllFund(ctx *gin.Context)
 	SearchFund(reqJSON dto.SocketDTO) (response []byte)
 	GetTopReturn(ctx *gin.Context)
@@ -82,12 +83,19 @@ func (c *fundController) GetFundByID(ctx *gin.Context) {
 	}
 }
 
-func (c *fundController) GetAllCat(ctx *gin.Context) {
-	var cat []model.AimcCat
-	if err := c.fundService.GetAllCat(&cat); err == nil {
-		ctx.JSON(http.StatusOK, cat)
+func (c *fundController) ListCat(ctx *gin.Context) {
+	var catList []model.AimcCat
+	if err := c.fundService.GetAllCat(&catList); err == nil {
+		ctx.JSON(http.StatusOK, catList)
 	} else {
 		ctx.AbortWithStatus(http.StatusBadRequest)
+	}
+}
+
+func (c *fundController) ListAmc(ctx *gin.Context) {
+	var amcList []model.Amc
+	if err := c.fundService.GetAllAmc(&amcList); err == nil {
+		ctx.JSON(http.StatusOK, amcList)
 	}
 }
 

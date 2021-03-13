@@ -96,7 +96,8 @@ func main() {
 		f := v1.Group("/funds")
 		{
 			f.GET("/info/:id", fundController.GetFundByID)
-			f.GET("/cats", fundController.GetAllCat)
+			f.GET("/cats", fundController.ListCat)
+			f.GET("/amcs", fundController.ListAmc)
 			f.GET("/nav/:id", navController.GetPastNavSeries)
 			f.GET("/nav/:id/latest", navController.GetLatestNav)
 			f.GET("/top/return", fundController.GetTopReturn)
