@@ -9,6 +9,7 @@ import (
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
 	"gorm.io/driver/mysql"
 
+	"github.com/gin-contrib/cors"
 	"github.com/joho/godotenv"
 	"gitlab.com/investio/backend/api/db"
 	"gitlab.com/investio/backend/api/v1/controller"
@@ -44,16 +45,6 @@ func setupDB() (err error) {
 		),
 		&gorm.Config{},
 	)
-	// db.MySQL, err = gorm.Open(
-	// 	"mysql",
-	// 	db.MySqlURL(db.BuildDbConfig(
-	// 		os.Getenv("MYSQL_HOST"),
-	// 		os.Getenv("MYSQL_PORT"),
-	// 		os.Getenv("MYSQL_USER"),
-	// 		os.Getenv("MYSQL_PWD"),
-	// 		os.Getenv("MYSQL_DB"),
-	// 	)),
-	// )
 
 	if err != nil {
 		log.Fatalln("Database Init error: ", err)
@@ -70,8 +61,6 @@ func setupDB() (err error) {
 }
 
 func main() {
-	// thaiRegx := regexp.Compile("")
-
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
@@ -90,6 +79,17 @@ func main() {
 	// fmt.Printf("Type: %T", db.MySQL)
 
 	server := gin.Default()
+
+	corsConfig := cors.DefaultConfig()
+	corsConfig.AllowOrigins = []string{"http://localhost:8080"}
+	// To be able to send tokens to the server.
+	corsConfig.AllowCredentials = true
+
+	// OPTIONS method for VueJS
+	corsConfig.AddAllowMethods("OPTIONS")
+
+	// Register the middleware
+	server.Use(cors.New(corsConfig))
 
 	v1 := server.Group("/v1")
 	{
