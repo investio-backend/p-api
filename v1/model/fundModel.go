@@ -22,7 +22,7 @@ type Fund struct {
 	ShortDescTh      string    `json:"short_desc_th"`
 	InceptionDate    time.Time `json:"inception_date"`
 	AmcID            uint32    `json:"amc_id"`
-	Stat             Stat
+	StatID           uint32
 	CreatedAt        time.Time      `json:"created_at"`
 	UpdatedAt        time.Time      `json:"updated_at"`
 	DeletedAt        gorm.DeletedAt `gorm:"index"`
@@ -34,6 +34,14 @@ type FundSearchResponse struct {
 	Code   string `json:"code"`
 	NameEn string `json:"name_en"`
 	NameTh string `json:"name_th"`
+}
+
+type FundStatResponse struct {
+	FundID string `json:"fund_id"`
+	Code   string `json:"code"`
+	NameEn string `json:"name_en"`
+	NameTh string `json:"name_th"`
+	// StatID uint32
 }
 
 type FundAllInfo struct {
@@ -60,6 +68,11 @@ func (Fund) TableName() string {
 
 // TableName fund
 func (FundSearchResponse) TableName() string {
+	return "fund"
+}
+
+// TableName fund
+func (FundStatResponse) TableName() string {
 	return "fund"
 }
 

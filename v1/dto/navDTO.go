@@ -1,6 +1,6 @@
 package dto
 
-// PastNavDTO - Query Params
-type PastNavDTO struct {
+// QueryStrPastNav - Query Params
+type QueryStrPastNav struct {
 	Range string `form:"range"`
 }

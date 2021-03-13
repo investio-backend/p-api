@@ -17,6 +17,7 @@ import (
 // FundController manages fund
 type FundController interface {
 	GetFundByID(ctx *gin.Context)
+	GetAllCat(ctx *gin.Context)
 	// GetAllFund(ctx *gin.Context)
 	SearchFund(reqJSON dto.SocketDTO) (response []byte)
 	GetTopReturn(ctx *gin.Context)
@@ -73,19 +74,37 @@ func (c *fundController) GetFundByID(ctx *gin.Context) {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			ctx.AbortWithStatus(http.StatusNotFound)
 		} else {
-			ctx.AbortWithStatus(http.StatusBadGateway)
+			ctx.AbortWithStatus(http.StatusBadRequest)
 		}
 
 	} else {
-		fmt.Println(fund)
+		// fmt.Println(fund)
 		ctx.JSON(http.StatusOK, fund)
 	}
 }
 
+func (c *fundController) GetAllCat(ctx *gin.Context) {
+	var cat []model.AimcCat
+	if err := c.fundService.GetAllCat(&cat); err == nil {
+		ctx.JSON(http.StatusOK, cat)
+	} else {
+		ctx.AbortWithStatus(http.StatusBadRequest)
+	}
+}
+
 func (c *fundController) GetTopReturn(ctx *gin.Context) {
-	var statRes []model.Stat
-	if err := c.fundService.FindTopReturn(&statRes); err != nil {
-		// fmt.Println("Return Err: ", err)
+	var statRes []model.Stat_1Y
+	var catQueryStr dto.QueryStrStat
+
+	if ctx.ShouldBindJSON(&catQueryStr) != nil {
+		catQueryStr = dto.QueryStrStat{
+			Cat:   "",
+			Range: "1y",
+		}
+	}
+
+	if err := c.fundService.FindTopReturn(&statRes, catQueryStr.Cat, catQueryStr.Range); err != nil {
+		fmt.Println("Return Err: ", err)
 		ctx.AbortWithStatus(http.StatusBadRequest)
 	} else {
 		// fmt.Println("Res: ", statRes)

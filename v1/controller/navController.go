@@ -30,7 +30,7 @@ func NewNavController(service service.NavService) NavController {
 
 func (c *navController) GetPastNavSeries(ctx *gin.Context) {
 	var pastNav []model.NavDate
-	var req dto.PastNavDTO
+	var req dto.QueryStrPastNav
 
 	fundID := ctx.Params.ByName("id")
 	// TODO: Check if fundID is number
