@@ -1,7 +1,6 @@
 package service
 
 import (
-	"fmt"
 	"regexp"
 
 	"gitlab.com/investio/backend/api/db"
@@ -14,7 +13,7 @@ type FundService interface {
 	GetAllBrdCat(cats *[]model.AimcBrdCat) (err error)
 	GetFundInfoByID(fund *model.FundAllInfo, fundID string) error
 	SearchFund(query string, limit int) (result []model.FundSearchResponse, err error)
-	FindTopReturn(stats *[]model.Stat_1Y, catID string, duration string) (err error)
+	FindTopReturn(stats *[]model.Stat_1Y, catID string, amcCode string, duration string) (err error)
 }
 
 type fundService struct {
@@ -93,33 +92,23 @@ func (service *fundService) searchFundByNameTH(funds *[]model.FundSearchResponse
 	return nil
 }
 
-func (service *fundService) FindTopReturn(result *[]model.Stat_1Y, catID string, duration string) (err error) {
-	// var fund model.Fund
-	// if err = db.MySQL.Model(&fund).Association("Stat").Error; err != nil {
-	// 	return err
-	// }
-	// db.MySQL.Model(&fund).Limit(50).Order("total_return_1y desc").Association("Stat").Find(&stats)
-	// return nil
+func (service *fundService) FindTopReturn(result *[]model.Stat_1Y, catID string, amcCode string, duration string) (err error) {
+	selectQ := "stat.net_assets, fund.code, fund.name_en, fund.name_th, aimc_cat.cat_name_en, "
 
-	// if err = db.MySQL.Limit(50).Preload("Fund").Order("total_return_1y desc").Find(&stats).Error; err != nil {
-	// 	return err
-	// }
-	// return nil
+	selectQ += "stat.total_return_1y, stat.total_return_p_1y, stat.total_return_avg_1y"
 
-	selectQ := "stat.std_1y, stat.net_assets, fund.code, fund.name_en, fund.name_th, aimc_cat.cat_name_en, "
+	query := db.MySQL.Model(&model.Stat{}).Limit(50).Order("total_return_1y desc").Select(selectQ).Joins("join fund on stat.id = fund.stat_id").Joins("join aimc_cat on fund.aimc_cat_id = aimc_cat.id").Joins("join amc on fund.amc_id = amc.id")
+	// fmt.Println(catID)
+	if catID != "" {
+		query = query.Where("cat_id = ?", catID)
+	}
 
-	selectQ += "stat.total_return_1y, stat.total_return_p_1y"
+	if amcCode != "" {
+		query = query.Where("amc_code = ?", amcCode)
+	}
 
-	query := db.MySQL.Model(&model.Stat{}).Limit(50).Order("total_return_1y desc").Select(selectQ).Joins("join fund on stat.id = fund.stat_id").Joins("join aimc_cat on fund.aimc_cat_id = aimc_cat.id")
-	fmt.Println(catID)
-	if catID == "" {
-		if err = query.Scan(&result).Error; err != nil {
-			return err
-		}
-	} else {
-		if err = query.Where("cat_id = ?", catID).Scan(&result).Error; err != nil {
-			return err
-		}
+	if err = query.Scan(&result).Error; err != nil {
+		return err
 	}
 	return nil
 }

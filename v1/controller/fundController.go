@@ -3,7 +3,6 @@ package controller
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"log"
 	"net/http"
 
@@ -98,13 +97,14 @@ func (c *fundController) GetTopReturn(ctx *gin.Context) {
 
 	if ctx.ShouldBindJSON(&catQueryStr) != nil {
 		catQueryStr = dto.QueryStrStat{
+			Amc:   "",
 			Cat:   "",
 			Range: "1y",
 		}
 	}
 
-	if err := c.fundService.FindTopReturn(&statRes, catQueryStr.Cat, catQueryStr.Range); err != nil {
-		fmt.Println("Return Err: ", err)
+	if err := c.fundService.FindTopReturn(&statRes, catQueryStr.Cat, catQueryStr.Amc, catQueryStr.Range); err != nil {
+		// fmt.Println("Return Err: ", err)
 		ctx.AbortWithStatus(http.StatusBadRequest)
 	} else {
 		// fmt.Println("Res: ", statRes)
