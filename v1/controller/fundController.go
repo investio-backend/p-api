@@ -103,7 +103,7 @@ func (c *fundController) GetTopReturn(ctx *gin.Context) {
 	var statRes []model.Stat_1Y
 	var catQueryStr dto.QueryStrStat
 
-	if ctx.ShouldBindJSON(&catQueryStr) != nil {
+	if ctx.ShouldBind(&catQueryStr) != nil {
 		catQueryStr = dto.QueryStrStat{
 			Amc:   "",
 			Cat:   "",

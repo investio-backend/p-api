@@ -101,7 +101,8 @@ func (service *fundService) searchFundByNameTH(funds *[]model.FundSearchResponse
 }
 
 func (service *fundService) FindTopReturn(result *[]model.Stat_1Y, catID string, amcCode string, duration string) (err error) {
-	selectQ := "stat.net_assets, fund.code, fund.name_en, fund.name_th, aimc_cat.cat_name_en, "
+	// TODO: data_date: "" & "total_return_p_1y": 0
+	selectQ := "stat.net_assets, fund.code, fund.fund_id, fund.name_en, fund.name_th, aimc_cat.cat_name_en, aimc_cat.cat_name_th, aimc_cat.cat_name_th, amc.amc_code, amc.amc_name_en, amc.amc_name_th, "
 
 	selectQ += "stat.total_return_1y, stat.total_return_p_1y, stat.total_return_avg_1y"
 
