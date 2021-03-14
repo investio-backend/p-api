@@ -3,7 +3,7 @@ module gitlab.com/investio/backend/api
 go 1.15
 
 require (
-	github.com/gin-contrib/cors v1.3.1 // indirect
+	github.com/gin-contrib/cors v1.3.1
 	github.com/gin-gonic/gin v1.6.3
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/influxdata/influxdb-client-go/v2 v2.2.1

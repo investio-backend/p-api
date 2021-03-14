@@ -81,7 +81,7 @@ func main() {
 	server := gin.Default()
 
 	corsConfig := cors.DefaultConfig()
-	corsConfig.AllowOrigins = []string{"http://localhost:8080"}
+	corsConfig.AllowOrigins = []string{"http://localhost:8080", "https://investio.dewkul.me", "https://investio.netlify.app"}
 	// To be able to send tokens to the server.
 	corsConfig.AllowCredentials = true
 
