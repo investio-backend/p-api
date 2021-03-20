@@ -52,7 +52,7 @@ func (c *socketController) handleWsMessage(s *melody.Session, query []byte) {
 
 	if reqType == "FUND" {
 		if reqTopic == "search" {
-			response = c.fundController.SearchFund(reqJSON)
+			response = c.fundController.SocketSearchFund(reqJSON)
 		}
 	}
 

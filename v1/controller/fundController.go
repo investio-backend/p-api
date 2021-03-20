@@ -19,7 +19,8 @@ type FundController interface {
 	ListCat(ctx *gin.Context)
 	ListAmc(ctx *gin.Context)
 	// GetAllFund(ctx *gin.Context)
-	SearchFund(reqJSON dto.SocketDTO) (response []byte)
+	SearchFund(ctx *gin.Context)
+	SocketSearchFund(reqJSON dto.SocketDTO) (response []byte)
 	GetTopReturn(ctx *gin.Context)
 }
 
@@ -34,7 +35,8 @@ func NewFundController(service service.FundService) FundController {
 	}
 }
 
-func (c *fundController) SearchFund(reqJSON dto.SocketDTO) (response []byte) {
+// TODO: Remove
+func (c *fundController) SocketSearchFund(reqJSON dto.SocketDTO) (response []byte) {
 	LIMIT := 5
 	funds, err := c.fundService.SearchFund(reqJSON.Data, LIMIT)
 	// fmt.Println("Search: ", funds)
@@ -62,6 +64,17 @@ func (c *fundController) SearchFund(reqJSON dto.SocketDTO) (response []byte) {
 		// fmt.Println(reqJSON.Topic, reqJSON.Data)
 	}
 	return
+}
+
+func (c *fundController) SearchFund(ctx *gin.Context) {
+	query := ctx.Params.ByName("fundQuery")
+	LIMIT := 5
+
+	if funds, err := c.fundService.SearchFund(query, LIMIT); err != nil {
+		ctx.AbortWithStatus(http.StatusUnprocessableEntity)
+	} else {
+		ctx.JSON(http.StatusOK, funds)
+	}
 }
 
 func (c *fundController) GetFundByID(ctx *gin.Context) {

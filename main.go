@@ -81,7 +81,7 @@ func main() {
 	server := gin.Default()
 
 	corsConfig := cors.DefaultConfig()
-	corsConfig.AllowOrigins = []string{"http://localhost:8080", "https://investio.dewkul.me", "https://investio.netlify.app"}
+	corsConfig.AllowOrigins = []string{"http://localhost:8080", "http://192.168.50.121:3003", "https://investio.dewkul.me", "https://investio.netlify.app"}
 	// To be able to send tokens to the server.
 	corsConfig.AllowCredentials = true
 
@@ -101,6 +101,7 @@ func main() {
 			f.GET("/nav/:id", navController.GetPastNavSeries)
 			f.GET("/nav/:id/latest", navController.GetLatestNav)
 			f.GET("/top/return", fundController.GetTopReturn)
+			f.GET("/search/:fundQuery", fundController.SearchFund)
 		}
 
 		ws := v1.Group("/ws")
