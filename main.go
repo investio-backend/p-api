@@ -93,7 +93,7 @@ func main() {
 
 	v1 := server.Group("/v1")
 	{
-		f := v1.Group("/funds")
+		f := v1.Group("/public/funds")
 		{
 			f.GET("/info/:id", fundController.GetFundByID)
 			f.GET("/cats", fundController.ListCat)
@@ -104,7 +104,7 @@ func main() {
 			f.GET("/search/:fundQuery", fundController.SearchFund)
 		}
 
-		ws := v1.Group("/ws")
+		ws := v1.Group("/public/ws")
 		{
 			ws.GET(":clientID", wsController.HandleSocket)
 		}
