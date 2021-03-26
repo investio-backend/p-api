@@ -91,9 +91,9 @@ func main() {
 	// Register the middleware
 	server.Use(cors.New(corsConfig))
 
-	v1 := server.Group("/v1")
+	v1 := server.Group("/public/v1")
 	{
-		f := v1.Group("/public/funds")
+		f := v1.Group("/funds")
 		{
 			f.GET("/info/:id", fundController.GetFundByID)
 			f.GET("/cats", fundController.ListCat)
@@ -104,7 +104,7 @@ func main() {
 			f.GET("/search/:fundQuery", fundController.SearchFund)
 		}
 
-		ws := v1.Group("/public/ws")
+		ws := v1.Group("/ws")
 		{
 			ws.GET(":clientID", wsController.HandleSocket)
 		}
