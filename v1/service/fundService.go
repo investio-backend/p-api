@@ -14,7 +14,8 @@ type FundService interface {
 	GetAllAmc(amc *[]model.Amc) (err error)
 	GetFundInfoByID(fund *model.FundAllInfo, fundID string) error
 	SearchFund(query string, limit int) (result []model.FundSearchResponse, err error)
-	FindTopReturn(stats *[]model.Stat_1Y, catID string, amcCode string, duration string) (err error)
+	FindTopStat1Y(stats *[]model.Stat_1Y, catID string, amcCode string) (err error)
+	FindTopStat6M(stats *[]model.Stat_6M, catID string, amcCode string) (err error)
 }
 
 type fundService struct {
@@ -61,7 +62,6 @@ func (service *fundService) GetFundInfoByID(fund *model.FundAllInfo, fundID stri
 		return err
 	}
 	return nil
-	// if err := db.MySQL.Joins("JOIN")
 }
 
 func (service *fundService) SearchFund(query string, limit int) (result []model.FundSearchResponse, err error) {
@@ -100,13 +100,37 @@ func (service *fundService) searchFundByNameTH(funds *[]model.FundSearchResponse
 	return nil
 }
 
-func (service *fundService) FindTopReturn(result *[]model.Stat_1Y, catID string, amcCode string, duration string) (err error) {
+func (service *fundService) FindTopStat1Y(result *[]model.Stat_1Y, catID string, amcCode string) (err error) {
 	// TODO: data_date: "" & "total_return_p_1y": 0
-	selectQ := "stat.net_assets, fund.code, fund.fund_id, fund.name_en, fund.name_th, aimc_cat.cat_name_en, aimc_cat.cat_name_th, aimc_cat.cat_name_th, amc.amc_code, amc.amc_name_en, amc.amc_name_th, "
+	selectQ := "stat.net_assets, stat.data_date, fund.code, fund.fund_id, fund.name_en, fund.name_th, aimc_cat.cat_name_en, aimc_cat.cat_name_th, aimc_cat.cat_name_th, amc.amc_code, amc.amc_name_en, amc.amc_name_th, "
 
 	selectQ += "stat.total_return_1y, stat.total_return_p_1y, stat.total_return_avg_1y"
+	orderBy := "total_return_1y desc"
 
-	query := db.MySQL.Model(&model.Stat{}).Limit(50).Order("total_return_1y desc").Select(selectQ).Joins("join fund on stat.id = fund.stat_id").Joins("join aimc_cat on fund.aimc_cat_id = aimc_cat.id").Joins("join amc on fund.amc_id = amc.id")
+	query := db.MySQL.Model(&model.Stat{}).Limit(50).Order(orderBy).Select(selectQ).Joins("join fund on stat.id = fund.stat_id").Joins("join aimc_cat on fund.aimc_cat_id = aimc_cat.id").Joins("join amc on fund.amc_id = amc.id")
+
+	if catID != "" {
+		query = query.Where("cat_id = ?", catID)
+	}
+
+	if amcCode != "" {
+		query = query.Where("amc_code = ?", amcCode)
+	}
+
+	if err = query.Find(&result).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (service *fundService) FindTopStat6M(result *[]model.Stat_6M, catID string, amcCode string) (err error) {
+	// TODO: data_date: "" & "total_return_p_1y": 0
+	selectQ := "stat.net_assets, stat.data_date, fund.code, fund.fund_id, fund.name_en, fund.name_th, aimc_cat.cat_name_en, aimc_cat.cat_name_th, aimc_cat.cat_name_th, amc.amc_code, amc.amc_name_en, amc.amc_name_th, "
+
+	selectQ += "stat.total_return_6m, stat.total_return_p_6m, stat.total_return_avg_6m"
+	orderBy := "total_return_6m desc"
+
+	query := db.MySQL.Model(&model.Stat{}).Limit(50).Order(orderBy).Select(selectQ).Joins("join fund on stat.id = fund.stat_id").Joins("join aimc_cat on fund.aimc_cat_id = aimc_cat.id").Joins("join amc on fund.amc_id = amc.id")
 	// fmt.Println(catID)
 	if catID != "" {
 		query = query.Where("cat_id = ?", catID)

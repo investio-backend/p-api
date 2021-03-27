@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"gitlab.com/investio/backend/api/v1/dto"
@@ -113,22 +114,33 @@ func (c *fundController) ListAmc(ctx *gin.Context) {
 }
 
 func (c *fundController) GetTopReturn(ctx *gin.Context) {
-	var statRes []model.Stat_1Y
-	var catQueryStr dto.QueryStrStat
 
-	if ctx.ShouldBind(&catQueryStr) != nil {
-		catQueryStr = dto.QueryStrStat{
+	var queryStr dto.QueryStrStat
+
+	if ctx.ShouldBind(&queryStr) != nil {
+		queryStr = dto.QueryStrStat{
 			Amc:   "",
 			Cat:   "",
 			Range: "1y",
 		}
 	}
-
-	if err := c.fundService.FindTopReturn(&statRes, catQueryStr.Cat, catQueryStr.Amc, catQueryStr.Range); err != nil {
-		// fmt.Println("Return Err: ", err)
-		ctx.AbortWithStatus(http.StatusBadRequest)
+	if strings.ToLower(queryStr.Range) == "1y" {
+		var statRes []model.Stat_1Y
+		if err := c.fundService.FindTopStat1Y(&statRes, queryStr.Cat, queryStr.Amc); err != nil {
+			// fmt.Println("Return Err: ", err)
+			ctx.AbortWithStatus(http.StatusBadRequest)
+		} else {
+			// fmt.Println("Res: ", statRes)
+			ctx.JSON(http.StatusOK, statRes)
+		}
+	} else if strings.ToLower(queryStr.Range) == "6m" {
+		var statRes []model.Stat_6M
+		if err := c.fundService.FindTopStat6M(&statRes, queryStr.Cat, queryStr.Amc); err != nil {
+			ctx.AbortWithStatus(http.StatusBadRequest)
+		} else {
+			ctx.JSON(http.StatusOK, statRes)
+		}
 	} else {
-		// fmt.Println("Res: ", statRes)
-		ctx.JSON(http.StatusOK, statRes)
+		ctx.AbortWithStatus(http.StatusUnprocessableEntity)
 	}
 }
