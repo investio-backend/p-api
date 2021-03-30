@@ -36,14 +36,6 @@ type FundSearchResponse struct {
 	NameTh string `json:"name_th"`
 }
 
-type FundStatResponse struct {
-	FundID string `json:"fund_id"`
-	Code   string `json:"code"`
-	NameEn string `json:"name_en"`
-	NameTh string `json:"name_th"`
-	// StatID uint32
-}
-
 type FundAllInfo struct {
 	FundID           string    `json:"fund_id"`
 	Code             string    `json:"code"`
@@ -58,7 +50,10 @@ type FundAllInfo struct {
 	ShortDescEn      string    `json:"short_desc_en"`
 	ShortDescTh      string    `json:"short_desc_th"`
 	InceptionDate    time.Time `json:"inception_date"`
-	AmcNameEn        string    `json:"amc_name_en"`
+	AmcCode          string    `json:"amc_code"`
+	// AmcNameEn        string    `json:"amc_name_en"`
+	// AmcNameTh        string    `json:"amc_name_th"`
+	CatID string `json:"cat_id"`
 }
 
 // TableName fund
@@ -68,11 +63,6 @@ func (Fund) TableName() string {
 
 // TableName fund
 func (FundSearchResponse) TableName() string {
-	return "fund"
-}
-
-// TableName fund
-func (FundStatResponse) TableName() string {
 	return "fund"
 }
 

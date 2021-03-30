@@ -24,9 +24,11 @@ var (
 
 	fundService service.FundService = service.NewFundService(thaiRegEx)
 	navService  service.NavService  = service.NewNavService()
+	statService service.StatService = service.NewStatService()
 
 	fundController controller.FundController = controller.NewFundController(fundService)
 	navController  controller.NavController  = controller.NewNavController(navService)
+	statController controller.StatController = controller.NewStatController(statService)
 
 	ws           *melody.Melody              = melody.New()
 	wsController controller.SocketController = controller.NewSocketController(ws, fundController)
@@ -100,8 +102,9 @@ func main() {
 			f.GET("/amcs", fundController.ListAmc)
 			f.GET("/nav/:id", navController.GetPastNavSeries)
 			f.GET("/nav/:id/latest", navController.GetLatestNav)
-			f.GET("/top/return", fundController.GetTopReturn)
 			f.GET("/search/:fundQuery", fundController.SearchFund)
+			f.GET("/top/return", statController.GetTopReturn)
+			f.GET("/stat/:fundID", statController.GetStatInfo)
 		}
 
 		ws := v1.Group("/ws")
