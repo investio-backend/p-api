@@ -34,8 +34,8 @@ jobs:
           # platforms: linux/amd64,linux/arm
           push: true
           tags: |
-            ${{ secrets.DOCKER_HUB_USER }}/test-gh-action:latest
-            ${{ secrets.DOCKER_HUB_USER }}/test-gh-action:${{ env.NOW }}
+            ${{ secrets.DOCKER_HUB_USER }}/${{ secrets.DOCKER_HUB_REPO }}:latest
+            ${{ secrets.DOCKER_HUB_USER }}/${{ secrets.DOCKER_HUB_REPO }}:${{ env.NOW }}
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
