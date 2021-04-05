@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"regexp"
+	_ "time/tzdata"
 
 	"github.com/gin-gonic/gin"
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
@@ -15,7 +16,8 @@ import (
 	"gitlab.com/investio/backend/api/v1/controller"
 	"gitlab.com/investio/backend/api/v1/model"
 	"gitlab.com/investio/backend/api/v1/service"
-	"gopkg.in/olahol/melody.v1"
+
+	// "gopkg.in/olahol/melody.v1"
 	"gorm.io/gorm"
 )
 
@@ -30,8 +32,8 @@ var (
 	navController  controller.NavController  = controller.NewNavController(navService)
 	statController controller.StatController = controller.NewStatController(statService)
 
-	ws           *melody.Melody              = melody.New()
-	wsController controller.SocketController = controller.NewSocketController(ws, fundController)
+	// ws           *melody.Melody              = melody.New()
+	// wsController controller.SocketController = controller.NewSocketController(ws, fundController)
 )
 
 func setupDB() (err error) {
@@ -54,7 +56,7 @@ func setupDB() (err error) {
 		db.MySQL.AutoMigrate(&model.Fund{})
 
 		db.InfluxClient = influxdb2.NewClient(
-			"http://"+os.Getenv("INFLUX_HOST")+":"+os.Getenv("INFLUX_PORT"),
+			os.Getenv("INFLUX_HOST"),
 			os.Getenv("INFLUX_TOKEN"),
 		)
 		db.InfluxQuery = db.InfluxClient.QueryAPI(os.Getenv("INFLUX_ORG"))
@@ -63,10 +65,13 @@ func setupDB() (err error) {
 }
 
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-		return
+	var err error
+	if os.Getenv("GIN_MODE") != "release" {
+		err = godotenv.Load()
+		if err != nil {
+			log.Fatal("Error loading .env file")
+			return
+		}
 	}
 
 	err = setupDB()
@@ -75,15 +80,12 @@ func main() {
 		return
 	}
 
-	// defer db.MySQL.Close()
 	defer db.InfluxClient.Close()
-
-	// fmt.Printf("Type: %T", db.MySQL)
 
 	server := gin.Default()
 
 	corsConfig := cors.DefaultConfig()
-	corsConfig.AllowOrigins = []string{"http://localhost:8080", "http://192.168.50.121:3003", "https://investio.dewkul.me", "https://investio.netlify.app"}
+	corsConfig.AllowOrigins = []string{"http://localhost:2564", "http://192.168.50.121:3003", "https://investio.dewkul.me", "https://investio.netlify.app"}
 	// To be able to send tokens to the server.
 	corsConfig.AllowCredentials = true
 
@@ -107,11 +109,15 @@ func main() {
 			f.GET("/stat/:fundID", statController.GetStatInfo)
 		}
 
-		ws := v1.Group("/ws")
-		{
-			ws.GET(":clientID", wsController.HandleSocket)
-		}
+		// ws := v1.Group("/ws")
+		// {
+		// 	ws.GET(":clientID", wsController.HandleSocket)
+		// }
 	}
 
-	server.Run(":" + os.Getenv("API_PORT"))
+	port := os.Getenv("API_PORT")
+	if port == "" {
+		port = "5005"
+	}
+	server.Run(":" + port)
 }
