@@ -8,11 +8,11 @@ import (
 )
 
 type FundService interface {
-	GetAllFunds(fund *[]model.FundAllInfo) (err error)
-	GetAllCat(aimc_cats *[]model.AimcCat) (err error)
-	GetAllBrdCat(cats *[]model.AimcBrdCat) (err error)
+	GetAllFunds(fund *[]model.Fund) (err error)
+	GetAllCat(aimc_cats *[]model.AimcBrdCat) (err error)
+	// GetAllBrdCat(cats *[]model.AimcBrdCat) (err error)
 	GetAllAmc(amc *[]model.Amc) (err error)
-	GetFundInfoByID(fund *model.FundAllInfo, fundID string) error
+	GetFundInfoByID(fund *model.Fund, fundID string) error
 	SearchFund(query string, limit int) (result []model.FundSearchResponse, err error)
 }
 
@@ -27,25 +27,30 @@ func NewFundService(thaiRegEx *regexp.Regexp) FundService {
 	}
 }
 
-func (service *fundService) GetAllFunds(funds *[]model.FundAllInfo) (err error) {
+func (service *fundService) GetAllFunds(funds *[]model.Fund) (err error) {
 	if err = db.MySQL.Find(&funds).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
-func (service *fundService) GetAllCat(aimc_cats *[]model.AimcCat) (err error) {
-	if err = db.MySQL.Find(&aimc_cats).Error; err != nil {
-		return err
-	}
-	return nil
-}
+// func (service *fundService) GetAllCat(aimc_cats *[]model.AimcCat) (err error) {
+// 	if err = db.MySQL.Find(&aimc_cats).Error; err != nil {
+// 		return err
+// 	}
+// 	return nil
+// }
 
-func (service *fundService) GetAllBrdCat(cats *[]model.AimcBrdCat) (err error) {
-	if err = db.MySQL.Find(&cats).Error; err != nil {
-		return err
-	}
-	return nil
+// func (service *fundService) GetAllBrdCat(cats *[]model.AimcBrdCat) (err error) {
+// 	if err = db.MySQL.Find(&cats).Error; err != nil {
+// 		return err
+// 	}
+// 	return nil
+// }
+
+func (service *fundService) GetAllCat(aimc_cats *[]model.AimcBrdCat) (err error) {
+	err = db.MySQL.Preload("Cats").Find(&aimc_cats).Error
+	return
 }
 
 func (service *fundService) GetAllAmc(amc *[]model.Amc) (err error) {
@@ -55,7 +60,7 @@ func (service *fundService) GetAllAmc(amc *[]model.Amc) (err error) {
 	return nil
 }
 
-func (service *fundService) GetFundInfoByID(fund *model.FundAllInfo, fundID string) (err error) {
+func (service *fundService) GetFundInfoByID(fund *model.Fund, fundID string) (err error) {
 	// selectQuery := ""
 	// query := db.Model(&model.Fund{}).Select(selectQuery).Joins()
 	// if err =

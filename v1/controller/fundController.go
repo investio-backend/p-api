@@ -78,7 +78,7 @@ func (c *fundController) SearchFund(ctx *gin.Context) {
 
 func (c *fundController) GetFundByID(ctx *gin.Context) {
 	code := ctx.Params.ByName("id")
-	var fund model.FundAllInfo
+	var fund model.Fund
 
 	err := c.fundService.GetFundInfoByID(&fund, code)
 
@@ -96,11 +96,11 @@ func (c *fundController) GetFundByID(ctx *gin.Context) {
 }
 
 func (c *fundController) ListCat(ctx *gin.Context) {
-	var catList []model.AimcCat
+	var catList []model.AimcBrdCat
 	if err := c.fundService.GetAllCat(&catList); err == nil {
 		ctx.JSON(http.StatusOK, catList)
 	} else {
-		ctx.AbortWithStatus(http.StatusBadRequest)
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, err.Error())
 	}
 }
 
