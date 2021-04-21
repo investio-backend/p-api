@@ -5,3 +5,8 @@ type QueryStrStat struct {
 	Amc   string `form:"amc" json:"amc"`
 	Range string `form:"range" json:"range"`
 }
+
+// FundIdenDTO - Latest NAV
+type FundIdenDTO struct {
+	FundID string `form:"fid"`
+}
