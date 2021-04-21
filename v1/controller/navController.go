@@ -88,10 +88,10 @@ func (c *navController) GetLatestNav(ctx *gin.Context) {
 	}
 }
 
-type pastNavByID struct {
-	FundID string `form:"fid"`
-	Range  string `form:"range"`
-}
+// type pastNavByID struct {
+// 	FundID string `form:"fid"`
+// 	Range  string `form:"range"`
+// }
 
 type pastNavByFundCode struct {
 	FundCode string `form:"code"`
