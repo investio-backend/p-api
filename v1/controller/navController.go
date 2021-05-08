@@ -1,9 +1,8 @@
 package controller
 
 import (
-	"fmt"
 	"net/http"
-	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"gitlab.com/investio/backend/api/v1/dto"
@@ -13,8 +12,9 @@ import (
 
 // NavController manages NAV
 type NavController interface {
-	GetPastNavSeries(ctx *gin.Context)
-	GetLatestNav(ctx *gin.Context)
+	GetPastNavWithAsset(ctx *gin.Context)
+	GetPastNav(ctx *gin.Context)
+	GetNavByDate(ctx *gin.Context)
 }
 
 type navController struct {
@@ -28,46 +28,131 @@ func NewNavController(service service.NavService) NavController {
 	}
 }
 
-func (c *navController) GetPastNavSeries(ctx *gin.Context) {
-	var pastNav []model.NavDate
-	var req dto.QueryStrPastNav
+func (c *navController) GetPastNavWithAsset(ctx *gin.Context) {
+	var (
+		pastNav []model.NavDate
+		reqByID pastNavByID
+		err     error
+	)
 
-	fundID := ctx.Params.ByName("id")
-	// TODO: Check if fundID is number
-
-	if ctx.ShouldBind(&req) != nil {
-		req.Range = "1mo"
+	if err = ctx.ShouldBind(&reqByID); err != nil {
+		ctx.AbortWithStatus(http.StatusBadRequest)
+		return
 	}
 
-	fmt.Println(req.Range)
+	// fmt.Println(reqByID.FundID)
+	if reqByID.FundID != "" {
+		err = c.service.FindPastNavWithAsset(&pastNav, reqByID.FundID, reqByID.Range)
+	} else {
+		ctx.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
 
-	err := c.service.GetPastNavByFundID(&pastNav, fundID, req.Range)
 	if err != nil {
-		fmt.Println(err.Error())
+		// fmt.Println(err.Error())
+		ctx.AbortWithError(http.StatusUnprocessableEntity, err)
+		return
+	}
+
+	if pastNav == nil {
+		ctx.AbortWithStatus(http.StatusNotFound)
+		return
+	}
+
+	response := model.NavSeries{
+		FundID: reqByID.FundID, Navs: pastNav,
+	}
+	ctx.JSON(http.StatusOK, response)
+
+}
+
+func (c *navController) GetPastNav(ctx *gin.Context) {
+	var (
+		nav     []float64
+		date    []string
+		reqByID pastNavByID
+		err     error
+	)
+	if err = ctx.ShouldBind(&reqByID); err != nil {
+		ctx.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	// fmt.Println(reqByID.FundID)
+	if err = ctx.ShouldBind(&reqByID); err != nil {
+		ctx.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	// fmt.Println(reqByID.FundID)
+	if reqByID.FundID != "" {
+		err = c.service.FindPastNav(&nav, &date, reqByID.FundID, reqByID.Range)
+	} else {
+		ctx.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	if err != nil {
+		// fmt.Println(err.Error())
+		ctx.AbortWithError(http.StatusUnprocessableEntity, err)
+		return
+	}
+
+	if len(date) == 0 {
+		ctx.AbortWithStatus(http.StatusNotFound)
+		return
+	}
+
+	// response := model.NavSeries{
+	// 	FundID: reqByID.FundID, Navs: pastNav,
+	// }
+	ctx.JSON(http.StatusOK, gin.H{
+		"nav":  nav,
+		"date": date,
+	})
+}
+
+func (c *navController) GetNavByDate(ctx *gin.Context) {
+
+	var (
+		nav model.NavDate
+		req dto.QueryNavByDate
+	)
+
+	if err := ctx.ShouldBind(&req); err != nil {
+		ctx.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+	// fmt.Println("Date: ", req.Date)
+
+	dataDate, err := time.Parse("2006-01-02", req.Date)
+
+	// Cannot extract date -> Get Latest NAV
+	if err != nil {
+		err := c.service.FindLatestNavByFundID(&nav, req.FundID)
+		if err != nil {
+			// fmt.Println(err.Error())
+			ctx.AbortWithStatus(http.StatusNotFound)
+			return
+		}
+	} else {
+		// Get NAV by date
+		err := c.service.FindNAVByDate(&nav, model.Date(dataDate), req.FundID)
+		if err != nil {
+			// fmt.Println(err.Error())
+			ctx.AbortWithStatus(http.StatusNotFound)
+			return
+		}
+
+	}
+	if nav.Date == "" {
 		ctx.AbortWithStatus(http.StatusNotFound)
 	} else {
-		fID, _ := strconv.ParseInt(fundID, 10, 32)
-		response := model.NavSeries{
-			FundID: int32(fID), Navs: pastNav,
-		}
-		ctx.JSON(http.StatusOK, response)
+		ctx.JSON(http.StatusOK, nav)
 	}
 }
 
-func (c *navController) GetLatestNav(ctx *gin.Context) {
-
-	var nav model.NavDate
-
-	fundID := ctx.Params.ByName("id")
-	// TODO: Validate if fundID is number
-
-	err := c.service.QueryLatestNavByFundID(&nav, fundID)
-
-	if err != nil {
-		fmt.Println(err.Error())
-		ctx.AbortWithStatus(http.StatusNotFound)
-	} else {
-		response := &nav
-		ctx.JSON(http.StatusOK, response)
-	}
+type pastNavByID struct {
+	FundID string `form:"f"`
+	Range  string `form:"range"`
 }

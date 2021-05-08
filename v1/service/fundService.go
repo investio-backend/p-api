@@ -8,14 +8,12 @@ import (
 )
 
 type FundService interface {
-	GetAllFunds(fund *[]model.FundAllInfo) (err error)
-	GetAllCat(aimc_cats *[]model.AimcCat) (err error)
-	GetAllBrdCat(cats *[]model.AimcBrdCat) (err error)
+	GetAllFunds(fund *[]model.Fund) (err error)
+	GetAllCat(aimc_cats *[]model.AimcBrdCat) (err error)
+	// GetAllBrdCat(cats *[]model.AimcBrdCat) (err error)
 	GetAllAmc(amc *[]model.Amc) (err error)
-	GetFundInfoByID(fund *model.FundAllInfo, fundID string) error
+	GetFundInfoByID(fund *model.Fund, fundID string) error
 	SearchFund(query string, limit int) (result []model.FundSearchResponse, err error)
-	FindTopStat1Y(stats *[]model.Stat_1Y, catID string, amcCode string) (err error)
-	FindTopStat6M(stats *[]model.Stat_6M, catID string, amcCode string) (err error)
 }
 
 type fundService struct {
@@ -29,25 +27,30 @@ func NewFundService(thaiRegEx *regexp.Regexp) FundService {
 	}
 }
 
-func (service *fundService) GetAllFunds(funds *[]model.FundAllInfo) (err error) {
+func (service *fundService) GetAllFunds(funds *[]model.Fund) (err error) {
 	if err = db.MySQL.Find(&funds).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
-func (service *fundService) GetAllCat(aimc_cats *[]model.AimcCat) (err error) {
-	if err = db.MySQL.Find(&aimc_cats).Error; err != nil {
-		return err
-	}
-	return nil
-}
+// func (service *fundService) GetAllCat(aimc_cats *[]model.AimcCat) (err error) {
+// 	if err = db.MySQL.Find(&aimc_cats).Error; err != nil {
+// 		return err
+// 	}
+// 	return nil
+// }
 
-func (service *fundService) GetAllBrdCat(cats *[]model.AimcBrdCat) (err error) {
-	if err = db.MySQL.Find(&cats).Error; err != nil {
-		return err
-	}
-	return nil
+// func (service *fundService) GetAllBrdCat(cats *[]model.AimcBrdCat) (err error) {
+// 	if err = db.MySQL.Find(&cats).Error; err != nil {
+// 		return err
+// 	}
+// 	return nil
+// }
+
+func (service *fundService) GetAllCat(aimc_cats *[]model.AimcBrdCat) (err error) {
+	err = db.MySQL.Preload("Cats").Find(&aimc_cats).Error
+	return
 }
 
 func (service *fundService) GetAllAmc(amc *[]model.Amc) (err error) {
@@ -57,7 +60,11 @@ func (service *fundService) GetAllAmc(amc *[]model.Amc) (err error) {
 	return nil
 }
 
-func (service *fundService) GetFundInfoByID(fund *model.FundAllInfo, fundID string) (err error) {
+func (service *fundService) GetFundInfoByID(fund *model.Fund, fundID string) (err error) {
+	// selectQuery := ""
+	// query := db.Model(&model.Fund{}).Select(selectQuery).Joins()
+	// if err =
+
 	if err = db.MySQL.Where("fund_id = ?", fundID).First(&fund).Error; err != nil {
 		return err
 	}
@@ -95,52 +102,6 @@ func (service *fundService) searchFundByNameEN(funds *[]model.FundSearchResponse
 
 func (service *fundService) searchFundByNameTH(funds *[]model.FundSearchResponse, name string, limit int) (err error) {
 	if err = db.MySQL.Limit(limit).Where("name_th LIKE ?", "%"+name+"%").Find(&funds).Error; err != nil {
-		return err
-	}
-	return nil
-}
-
-func (service *fundService) FindTopStat1Y(result *[]model.Stat_1Y, catID string, amcCode string) (err error) {
-	// TODO: data_date: "" & "total_return_p_1y": 0
-	selectQ := "stat.net_assets, stat.data_date, fund.code, fund.fund_id, fund.name_en, fund.name_th, aimc_cat.cat_name_en, aimc_cat.cat_name_th, aimc_cat.cat_name_th, amc.amc_code, amc.amc_name_en, amc.amc_name_th, "
-
-	selectQ += "stat.total_return_1y, stat.total_return_p_1y, stat.total_return_avg_1y"
-	orderBy := "total_return_1y desc"
-
-	query := db.MySQL.Model(&model.Stat{}).Limit(50).Order(orderBy).Select(selectQ).Joins("join fund on stat.id = fund.stat_id").Joins("join aimc_cat on fund.aimc_cat_id = aimc_cat.id").Joins("join amc on fund.amc_id = amc.id")
-
-	if catID != "" {
-		query = query.Where("cat_id = ?", catID)
-	}
-
-	if amcCode != "" {
-		query = query.Where("amc_code = ?", amcCode)
-	}
-
-	if err = query.Find(&result).Error; err != nil {
-		return err
-	}
-	return nil
-}
-
-func (service *fundService) FindTopStat6M(result *[]model.Stat_6M, catID string, amcCode string) (err error) {
-	// TODO: data_date: "" & "total_return_p_1y": 0
-	selectQ := "stat.net_assets, stat.data_date, fund.code, fund.fund_id, fund.name_en, fund.name_th, aimc_cat.cat_name_en, aimc_cat.cat_name_th, aimc_cat.cat_name_th, amc.amc_code, amc.amc_name_en, amc.amc_name_th, "
-
-	selectQ += "stat.total_return_6m, stat.total_return_p_6m, stat.total_return_avg_6m"
-	orderBy := "total_return_6m desc"
-
-	query := db.MySQL.Model(&model.Stat{}).Limit(50).Order(orderBy).Select(selectQ).Joins("join fund on stat.id = fund.stat_id").Joins("join aimc_cat on fund.aimc_cat_id = aimc_cat.id").Joins("join amc on fund.amc_id = amc.id")
-	// fmt.Println(catID)
-	if catID != "" {
-		query = query.Where("cat_id = ?", catID)
-	}
-
-	if amcCode != "" {
-		query = query.Where("amc_code = ?", amcCode)
-	}
-
-	if err = query.Scan(&result).Error; err != nil {
 		return err
 	}
 	return nil

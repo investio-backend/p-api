@@ -5,7 +5,6 @@ import (
 	"errors"
 	"log"
 	"net/http"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 	"gitlab.com/investio/backend/api/v1/dto"
@@ -22,7 +21,6 @@ type FundController interface {
 	// GetAllFund(ctx *gin.Context)
 	SearchFund(ctx *gin.Context)
 	SocketSearchFund(reqJSON dto.SocketDTO) (response []byte)
-	GetTopReturn(ctx *gin.Context)
 }
 
 type fundController struct {
@@ -80,7 +78,7 @@ func (c *fundController) SearchFund(ctx *gin.Context) {
 
 func (c *fundController) GetFundByID(ctx *gin.Context) {
 	code := ctx.Params.ByName("id")
-	var fund model.FundAllInfo
+	var fund model.Fund
 
 	err := c.fundService.GetFundInfoByID(&fund, code)
 
@@ -98,11 +96,11 @@ func (c *fundController) GetFundByID(ctx *gin.Context) {
 }
 
 func (c *fundController) ListCat(ctx *gin.Context) {
-	var catList []model.AimcCat
+	var catList []model.AimcBrdCat
 	if err := c.fundService.GetAllCat(&catList); err == nil {
 		ctx.JSON(http.StatusOK, catList)
 	} else {
-		ctx.AbortWithStatus(http.StatusBadRequest)
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, err.Error())
 	}
 }
 
@@ -110,37 +108,5 @@ func (c *fundController) ListAmc(ctx *gin.Context) {
 	var amcList []model.Amc
 	if err := c.fundService.GetAllAmc(&amcList); err == nil {
 		ctx.JSON(http.StatusOK, amcList)
-	}
-}
-
-func (c *fundController) GetTopReturn(ctx *gin.Context) {
-
-	var queryStr dto.QueryStrStat
-
-	if ctx.ShouldBind(&queryStr) != nil {
-		queryStr = dto.QueryStrStat{
-			Amc:   "",
-			Cat:   "",
-			Range: "1y",
-		}
-	}
-	if strings.ToLower(queryStr.Range) == "1y" {
-		var statRes []model.Stat_1Y
-		if err := c.fundService.FindTopStat1Y(&statRes, queryStr.Cat, queryStr.Amc); err != nil {
-			// fmt.Println("Return Err: ", err)
-			ctx.AbortWithStatus(http.StatusBadRequest)
-		} else {
-			// fmt.Println("Res: ", statRes)
-			ctx.JSON(http.StatusOK, statRes)
-		}
-	} else if strings.ToLower(queryStr.Range) == "6m" {
-		var statRes []model.Stat_6M
-		if err := c.fundService.FindTopStat6M(&statRes, queryStr.Cat, queryStr.Amc); err != nil {
-			ctx.AbortWithStatus(http.StatusBadRequest)
-		} else {
-			ctx.JSON(http.StatusOK, statRes)
-		}
-	} else {
-		ctx.AbortWithStatus(http.StatusUnprocessableEntity)
 	}
 }

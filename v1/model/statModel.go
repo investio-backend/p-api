@@ -13,15 +13,21 @@ type Stat struct {
 	DataDate          Date            `json:"data_date"`
 	TotalReturn_1y    decimal.Decimal `json:"total_return_1y" sql:"type:decimal(7,4);"`
 	TotalReturnP_1y   uint16          `json:"total_return_p_1y" gorm:"column:total_return_p_1y"`
+	TotalReturnAvg_1y decimal.Decimal `json:"total_return_avg_1y"`
 	TotalReturn_6m    decimal.Decimal `json:"total_return_6m"`
 	TotalReturnP_6m   uint16          `json:"total_return_p_6m" gorm:"column:total_return_p_6m"`
 	TotalReturnAvg_6m decimal.Decimal `json:"total_return_avg_6m"`
+	TotalReturn_3m    decimal.Decimal `json:"total_return_3m"`
+	TotalReturnP_3m   uint16          `json:"total_return_p_3m" gorm:"column:total_return_p_3m"`
+	TotalReturnAvg_3m decimal.Decimal `json:"total_return_avg_3m"`
+	TotalReturn_1m    decimal.Decimal `json:"total_return_1m"`
+	TotalReturn_1w    decimal.Decimal `json:"total_return_1w"`
 	NetAssets         decimal.Decimal `json:"net_asset"`
 	Std_1y            decimal.Decimal `json:"std_1y"`
 	StdP_1y           uint16          `json:"std_p_1y" gorm:"column:std_p_1y"`
 	StdAvg_1y         decimal.Decimal `json:"std_avg_1y"`
 	UnitChange_1y     decimal.Decimal `json:"unit_change_1y"`
-	UnitChange_6m     decimal.Decimal
+	// UnitChange_6m     decimal.Decimal
 	// FundID    uint16
 	// Fund      FundStatResponse
 	CreatedAt time.Time      `json:"created_at"`
@@ -32,6 +38,27 @@ type Stat struct {
 // TableName stat
 func (Stat) TableName() string {
 	return "stat"
+}
+
+type StatFundResponse struct {
+	FundID            string          `json:"fund_id"`
+	Code              string          `json:"fund_code"`
+	TotalReturn_1y    decimal.Decimal `json:"total_return_1y"`
+	TotalReturnP_1y   uint16          `json:"total_return_p_1y" gorm:"column:total_return_p_1y"`
+	TotalReturnAvg_1y decimal.Decimal `json:"total_return_avg_1y"`
+	TotalReturn_6m    decimal.Decimal `json:"total_return_6m"`
+	TotalReturnP_6m   uint16          `json:"total_return_p_6m" gorm:"column:total_return_p_6m"`
+	TotalReturnAvg_6m decimal.Decimal `json:"total_return_avg_6m"`
+	TotalReturn_3m    decimal.Decimal `json:"total_return_3m"`
+	TotalReturnP_3m   uint16          `json:"total_return_p_3m" gorm:"column:total_return_p_3m"`
+	TotalReturnAvg_3m decimal.Decimal `json:"total_return_avg_3m"`
+	TotalReturn_1m    decimal.Decimal `json:"total_return_1m"`
+	TotalReturn_1w    decimal.Decimal `json:"total_return_1w"`
+	NetAssets         decimal.Decimal `json:"net_asset"`
+	Std_1y            decimal.Decimal `json:"std_1y"`
+	StdP_1y           uint16          `json:"std_p_1y" gorm:"column:std_p_1y"`
+	StdAvg_1y         decimal.Decimal `json:"std_avg_1y"`
+	DataDate          Date            `json:"data_date"`
 }
 
 type Stat_1Y struct {

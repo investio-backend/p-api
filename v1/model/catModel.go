@@ -1,9 +1,11 @@
 package model
 
 type AimcCat struct {
-	CatID     string `json:"id"`
+	ID        uint32 `gorm:"primary_key" json:"-"`
+	CatID     string `json:"cid"`
 	CatNameEn string `json:"name_en"`
 	CatNameTh string `json:"name_th"`
+	BrdCatID  uint32 `json:"-"`
 }
 
 func (AimcCat) TableName() string {
@@ -11,9 +13,11 @@ func (AimcCat) TableName() string {
 }
 
 type AimcBrdCat struct {
-	CatID     string `json:"id"`
-	CatNameEn string `json:"name_en"`
-	CatNameTh string `json:"name_th"`
+	ID         uint32    `gorm:"primary_key" json:"-"`
+	BcatID     string    `json:"bid"`
+	BcatNameEn string    `json:"name_en"`
+	BcatNameTh string    `json:"name_th"`
+	Cats       []AimcCat `json:"cats" gorm:"foreignKey:BrdCatID;references:ID"`
 }
 
 func (AimcBrdCat) TableName() string {

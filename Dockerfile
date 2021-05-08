@@ -36,7 +36,10 @@ RUN cp /build/main .
 FROM scratch
 
 COPY --from=builder /dist/main /
-COPY .env .
+# COPY .env .
+
+ENV TZ=Asia/Bangkok
+ENV GIN_MODE=release
 
 # Command to run
 ENTRYPOINT ["/main"]
