@@ -107,8 +107,10 @@ func (c *navController) GetPastNav(ctx *gin.Context) {
 	// 	FundID: reqByID.FundID, Navs: pastNav,
 	// }
 	ctx.JSON(http.StatusOK, gin.H{
-		"nav":  nav,
-		"date": date,
+		"nav": gin.H{
+			"data": nav,
+		},
+		"dates": date,
 	})
 }
 
