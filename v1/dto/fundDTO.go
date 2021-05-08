@@ -6,7 +6,8 @@ type QueryStrStat struct {
 	Range string `form:"range" json:"range"`
 }
 
-// FundIdenDTO - Latest NAV
-type FundIdenDTO struct {
-	FundID string `form:"fid"`
+// QueryNavByDate - Latest NAV
+type QueryNavByDate struct {
+	FundID string `form:"f"`
+	Date   string `form:"date"`
 }

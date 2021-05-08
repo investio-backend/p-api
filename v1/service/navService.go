@@ -2,16 +2,16 @@ package service
 
 import (
 	"context"
-	"fmt"
 
 	"gitlab.com/investio/backend/api/db"
 	"gitlab.com/investio/backend/api/v1/model"
 )
 
 type NavService interface {
-	GetPastNavByFundCode(navList *[]model.NavDate, fundCode, dataRange string) (err error)
-	GetPastNavByFundID(navList *[]model.NavDate, fundID, dataRange string) error
-	QueryLatestNavByFundID(navList *model.NavDate, fundID string) error
+	FindPastNavWithAsset(navList *[]model.NavDate, fundID, dataRange string) (err error)
+	FindPastNav(nav *[]float64, date *[]string, fundID, dataRange string) error
+	FindLatestNavByFundID(navList *model.NavDate, fundID string) error
+	FindNAVByDate(navList *model.NavDate, dataDate model.Date, fundID string) error
 }
 
 type navService struct {
@@ -24,16 +24,16 @@ func NewNavService() NavService {
 	}
 }
 
-func (s *navService) GetPastNavByFundCode(navList *[]model.NavDate, fundCode, dataRange string) (err error) {
+func (s *navService) FindPastNavWithAsset(navList *[]model.NavDate, fundID, dataRange string) (err error) {
 	navs := make(map[string]*model.NavDate)
 
 	result, err := db.InfluxQuery.Query(
 		context.Background(),
 		`from(bucket: "`+s.bucket+`")
-		|> range(start: -`+dataRange+`1d)
+		|> range(start: -`+dataRange+`)
 		|> filter(fn: (r) => r._measurement == "PastNAV")
 		|> filter(fn: (r) => r._field == "nav" or r._field == "asset_amount")
-		|> filter(fn: (r) => r.fund_code == "`+fundCode+`")
+		|> filter(fn: (r) => r.fund_id == "`+fundID+`")
 	`)
 
 	if err != nil {
@@ -72,7 +72,7 @@ func (s *navService) GetPastNavByFundCode(navList *[]model.NavDate, fundCode, da
 	}
 	// check for an error
 	if result.Err() != nil {
-		fmt.Printf("query parsing error: %s\n", result.Err().Error())
+		// fmt.Printf("query parsing error: %s\n", result.Err().Error())
 		err = result.Err()
 		return
 	}
@@ -84,11 +84,11 @@ func (s *navService) GetPastNavByFundCode(navList *[]model.NavDate, fundCode, da
 	return
 }
 
-func (s *navService) GetPastNavByFundID(navList *[]model.NavDate, fundID, dataRange string) error {
+func (s *navService) FindPastNav(navList *[]float64, dateList *[]string, fundID, dataRange string) error {
 	result, err := db.InfluxQuery.Query(
 		context.Background(),
 		`from(bucket:"`+s.bucket+`")
-		|> range(start: -`+dataRange+`1d)
+		|> range(start: -`+dataRange+`)
 		|> filter(fn: (r) => r._measurement == "PastNAV")
 		|> filter(fn: (r) => r._field == "nav"
 			and r.fund_id == "`+fundID+`")`)
@@ -99,24 +99,21 @@ func (s *navService) GetPastNavByFundID(navList *[]model.NavDate, fundID, dataRa
 
 	// Iterate over query response
 	for result.Next() {
-		// Access data
 		nav := result.Record().Value().(float64)
 		date := result.Record().Time().Format("2006-01-02")
 
-		navDate := model.NavDate{
-			Date: date, Nav: nav,
-		}
-		*navList = append(*navList, navDate)
+		*navList = append(*navList, nav)
+		*dateList = append(*dateList, date)
 	}
 	// check for an error
 	if result.Err() != nil {
-		fmt.Printf("query parsing error: %s\n", result.Err().Error())
+		// fmt.Printf("query parsing error: %s\n", result.Err().Error())
 		return result.Err()
 	}
 	return nil
 }
 
-func (s *navService) QueryLatestNavByFundID(navList *model.NavDate, fundID string) error {
+func (s *navService) FindLatestNavByFundID(navList *model.NavDate, fundID string) error {
 	var (
 		nav   float64
 		date  string
@@ -125,10 +122,44 @@ func (s *navService) QueryLatestNavByFundID(navList *model.NavDate, fundID strin
 	result, err := db.InfluxQuery.Query(
 		context.Background(),
 		`from(bucket:"`+s.bucket+`")
-		|> range(start: -2w)
+		|> range(start: -2mo)
 		|> filter(fn: (r) => r._field == "nav" or r._field == "asset_amount")
 		|> filter(fn: (r) => r.fund_id == "`+fundID+`")
 		|> last(column: "_time")`)
+
+	if err != nil {
+		return err
+	}
+
+	for result.Next() {
+		if result.Record().Field() == "nav" {
+			nav = result.Record().Value().(float64)
+			date = result.Record().Time().Format("2006-01-02")
+		} else {
+			asset = result.Record().Value().(int64)
+		}
+	}
+
+	*navList = model.NavDate{
+		Date: date, Nav: nav, Asset: asset,
+	}
+
+	return nil
+}
+
+func (s *navService) FindNAVByDate(navList *model.NavDate, dataDate model.Date, fundID string) error {
+	var (
+		nav   float64
+		date  string
+		asset int64
+	)
+	result, err := db.InfluxQuery.Query(
+		context.Background(),
+		`from(bucket:"`+s.bucket+`")
+		|> range(start: `+dataDate.String()+`T00:00:00Z, stop: `+dataDate.String()+`T23:59:59Z)
+		|> filter(fn: (r) => r._field == "nav" or r._field == "asset_amount")
+		|> filter(fn: (r) => r.fund_id == "`+fundID+`")
+	`)
 
 	if err != nil {
 		return err
