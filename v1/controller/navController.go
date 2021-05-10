@@ -68,8 +68,7 @@ func (c *navController) GetPastNavWithAsset(ctx *gin.Context) {
 
 func (c *navController) GetPastNav(ctx *gin.Context) {
 	var (
-		nav     []float64
-		date    []string
+		navList [][2]interface{}
 		reqByID pastNavByID
 		err     error
 	)
@@ -86,7 +85,7 @@ func (c *navController) GetPastNav(ctx *gin.Context) {
 
 	// fmt.Println(reqByID.FundID)
 	if reqByID.FundID != "" {
-		err = c.service.FindPastNav(&nav, &date, reqByID.FundID, reqByID.Range)
+		err = c.service.FindPastNavChart(&navList, reqByID.FundID, reqByID.Range)
 	} else {
 		ctx.AbortWithStatus(http.StatusBadRequest)
 		return
@@ -98,7 +97,7 @@ func (c *navController) GetPastNav(ctx *gin.Context) {
 		return
 	}
 
-	if len(date) == 0 {
+	if len(navList) == 0 {
 		ctx.AbortWithStatus(http.StatusNotFound)
 		return
 	}
@@ -106,12 +105,13 @@ func (c *navController) GetPastNav(ctx *gin.Context) {
 	// response := model.NavSeries{
 	// 	FundID: reqByID.FundID, Navs: pastNav,
 	// }
-	ctx.JSON(http.StatusOK, gin.H{
-		"nav": gin.H{
-			"data": nav,
-		},
-		"dates": date,
-	})
+	ctx.JSON(http.StatusOK, navList)
+	// ctx.JSON(http.StatusOK, gin.H{
+	// 	"nav": gin.H{
+	// 		"data": nav,
+	// 	},
+	// 	"dates": date,
+	// })
 }
 
 func (c *navController) GetNavByDate(ctx *gin.Context) {

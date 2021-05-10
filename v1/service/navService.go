@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"time"
 
 	"gitlab.com/investio/backend/api/db"
 	"gitlab.com/investio/backend/api/v1/model"
@@ -9,7 +10,7 @@ import (
 
 type NavService interface {
 	FindPastNavWithAsset(navList *[]model.NavDate, fundID, dataRange string) (err error)
-	FindPastNav(nav *[]float64, date *[]string, fundID, dataRange string) error
+	FindPastNavChart(nav *[][2]interface{}, fundID, dataRange string) error
 	FindLatestNavByFundID(navList *model.NavDate, fundID string) error
 	FindNAVByDate(navList *model.NavDate, dataDate model.Date, fundID string) error
 }
@@ -82,6 +83,34 @@ func (s *navService) FindPastNavWithAsset(navList *[]model.NavDate, fundID, data
 		*navList = append(*navList, *navs[k])
 	}
 	return
+}
+
+func (s *navService) FindPastNavChart(nav *[][2]interface{}, fundID, dataRange string) error {
+	result, err := db.InfluxQuery.Query(
+		context.Background(),
+		`from(bucket:"`+s.bucket+`")
+		|> range(start: -`+dataRange+`)
+		|> filter(fn: (r) => r._measurement == "PastNAV")
+		|> filter(fn: (r) => r._field == "nav"
+			and r.fund_id == "`+fundID+`")`)
+
+	if err != nil {
+		return err
+	}
+
+	// Iterate over query response
+	for result.Next() {
+		navVal := result.Record().Value().(float64)
+		date := result.Record().Time().UnixNano() / int64(time.Millisecond)
+
+		*nav = append(*nav, [2]interface{}{date, navVal})
+	}
+	// check for an error
+	if result.Err() != nil {
+		// fmt.Printf("query parsing error: %s\n", result.Err().Error())
+		return result.Err()
+	}
+	return nil
 }
 
 func (s *navService) FindPastNav(navList *[]float64, dateList *[]string, fundID, dataRange string) error {
