@@ -78,7 +78,7 @@ func (c *fundController) SearchFund(ctx *gin.Context) {
 
 func (c *fundController) GetFundByID(ctx *gin.Context) {
 	code := ctx.Params.ByName("id")
-	var fund model.Fund
+	var fund model.FundInfoResponse
 
 	err := c.fundService.GetFundInfoByID(&fund, code)
 
