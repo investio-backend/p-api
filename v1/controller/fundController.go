@@ -77,10 +77,10 @@ func (c *fundController) SearchFund(ctx *gin.Context) {
 }
 
 func (c *fundController) GetFundByID(ctx *gin.Context) {
-	code := ctx.Params.ByName("id")
+	id := ctx.Params.ByName("id")
 	var fund model.FundInfoResponse
 
-	err := c.fundService.GetFundInfoByID(&fund, code)
+	err := c.fundService.GetFundInfoByID(&fund, id)
 
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
