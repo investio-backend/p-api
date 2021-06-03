@@ -103,7 +103,6 @@ func main() {
 			f.GET("/cats", fundController.ListCat)
 			f.GET("/amcs", fundController.ListAmc)
 			f.GET("/nav/series", navController.GetPastNav)
-			f.GET("/nav/series/ast", navController.GetPastNavWithAsset)
 			f.GET("/nav", navController.GetNavByDate)
 			f.GET("/search/:fundQuery", fundController.SearchFund)
 			f.GET("/top/return", statController.GetTopReturn)
@@ -114,6 +113,12 @@ func main() {
 		// {
 		// 	ws.GET(":clientID", wsController.HandleSocket)
 		// }
+	}
+
+	internalV1 := server.Group("/s2gsoeq93f/v1")
+	{
+		internalV1.GET("/index/set", navController.GetPastSetIndex)
+		internalV1.GET("/nav/series/ast", navController.GetPastNavWithAsset)
 	}
 
 	port := os.Getenv("API_PORT")

@@ -9,23 +9,26 @@ import (
 )
 
 type NavService interface {
-	FindPastNavWithAsset(navList *[]model.NavDate, fundID, dataRange string) (err error)
+	FindPastNavWithAsset(navList *[]model.NavDate, fundCode, dataRange string) (err error)
 	FindPastNavChart(nav *[][2]interface{}, fundID, dataRange string) error
 	FindLatestNavByFundID(navList *model.NavDate, fundID string) error
 	FindNAVByDate(navList *model.NavDate, dataDate model.Date, fundID string) error
+	FindPastSetIndex(setList *[]model.SetDatePrice, dataRange string) (err error)
 }
 
 type navService struct {
-	bucket string
+	bucket      string
+	indexBucket string
 }
 
 func NewNavService() NavService {
 	return &navService{
-		bucket: "DailyFund",
+		bucket:      "DailyFund",
+		indexBucket: "DailyStock",
 	}
 }
 
-func (s *navService) FindPastNavWithAsset(navList *[]model.NavDate, fundID, dataRange string) (err error) {
+func (s *navService) FindPastNavWithAsset(navList *[]model.NavDate, fundCode, dataRange string) (err error) {
 	navs := make(map[string]*model.NavDate)
 
 	result, err := db.InfluxQuery.Query(
@@ -34,7 +37,7 @@ func (s *navService) FindPastNavWithAsset(navList *[]model.NavDate, fundID, data
 		|> range(start: -`+dataRange+`)
 		|> filter(fn: (r) => r._measurement == "PastNAV")
 		|> filter(fn: (r) => r._field == "nav" or r._field == "asset_amount")
-		|> filter(fn: (r) => r.fund_id == "`+fundID+`")
+		|> filter(fn: (r) => r.fund_code == "`+fundCode+`")
 	`)
 
 	if err != nil {
@@ -208,4 +211,31 @@ func (s *navService) FindNAVByDate(navList *model.NavDate, dataDate model.Date, 
 	}
 
 	return nil
+}
+
+func (s *navService) FindPastSetIndex(setList *[]model.SetDatePrice, dataRange string) (err error) {
+	bucket := "DailyStock"
+	result, err := db.InfluxQuery.Query(
+		context.Background(),
+		`from(bucket:"`+bucket+`")
+		|> range(start: -`+dataRange+`)
+		|> filter(fn: (r) => r._measurement == "PastIndex")
+		|> filter(fn: (r) => r._field == "Close")
+	`)
+	if err != nil {
+		return
+	}
+
+	// Iterate over query response
+	for result.Next() {
+		// Access data
+		close := result.Record().Value().(float64)
+		date := result.Record().Time().Format("2006-01-02")
+
+		set := model.SetDatePrice{
+			Date: date, Price: close,
+		}
+		*setList = append(*setList, set)
+	}
+	return
 }

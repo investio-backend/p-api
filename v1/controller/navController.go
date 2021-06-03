@@ -15,6 +15,7 @@ type NavController interface {
 	GetPastNavWithAsset(ctx *gin.Context)
 	GetPastNav(ctx *gin.Context)
 	GetNavByDate(ctx *gin.Context)
+	GetPastSetIndex(ctx *gin.Context)
 }
 
 type navController struct {
@@ -28,21 +29,26 @@ func NewNavController(service service.NavService) NavController {
 	}
 }
 
+type pastNavByFundCode struct {
+	FundCode string `form:"f"`
+	Range    string `form:"range"`
+}
+
 func (c *navController) GetPastNavWithAsset(ctx *gin.Context) {
 	var (
-		pastNav []model.NavDate
-		reqByID pastNavByID
-		err     error
+		pastNav       []model.NavDate
+		reqByFundCode pastNavByFundCode
+		err           error
 	)
 
-	if err = ctx.ShouldBind(&reqByID); err != nil {
+	if err = ctx.ShouldBind(&reqByFundCode); err != nil {
 		ctx.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
 
 	// fmt.Println(reqByID.FundID)
-	if reqByID.FundID != "" {
-		err = c.service.FindPastNavWithAsset(&pastNav, reqByID.FundID, reqByID.Range)
+	if reqByFundCode.FundCode != "" {
+		err = c.service.FindPastNavWithAsset(&pastNav, reqByFundCode.FundCode, reqByFundCode.Range)
 	} else {
 		ctx.AbortWithStatus(http.StatusBadRequest)
 		return
@@ -60,10 +66,15 @@ func (c *navController) GetPastNavWithAsset(ctx *gin.Context) {
 	}
 
 	response := model.NavSeries{
-		FundID: reqByID.FundID, Navs: pastNav,
+		FundCode: reqByFundCode.FundCode, Navs: pastNav,
 	}
 	ctx.JSON(http.StatusOK, response)
 
+}
+
+type pastNavByID struct {
+	FundID string `form:"f"`
+	Range  string `form:"range"`
 }
 
 func (c *navController) GetPastNav(ctx *gin.Context) {
@@ -115,7 +126,6 @@ func (c *navController) GetPastNav(ctx *gin.Context) {
 }
 
 func (c *navController) GetNavByDate(ctx *gin.Context) {
-
 	var (
 		nav model.NavDate
 		req dto.QueryNavByDate
@@ -154,7 +164,17 @@ func (c *navController) GetNavByDate(ctx *gin.Context) {
 	}
 }
 
-type pastNavByID struct {
-	FundID string `form:"f"`
-	Range  string `form:"range"`
+func (c *navController) GetPastSetIndex(ctx *gin.Context) {
+	var result []model.SetDatePrice
+
+	if err := c.service.FindPastSetIndex(&result, "6mo"); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadGateway, err.Error())
+		return
+	}
+
+	response := model.SetSeries{
+		Name: "SET",
+		Navs: result,
+	}
+	ctx.JSON(http.StatusOK, response)
 }

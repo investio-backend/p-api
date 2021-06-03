@@ -11,3 +11,13 @@ type NavSeries struct {
 	FundCode string    `json:"fund_code,omitempty"`
 	Navs     []NavDate `json:"navs"`
 }
+
+type SetDatePrice struct {
+	Date  string  `json:"date"`
+	Price float64 `json:"close"`
+}
+
+type SetSeries struct {
+	Name string         `json:"code"`
+	Navs []SetDatePrice `json:"prices"`
+}
