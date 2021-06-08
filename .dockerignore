@@ -2,3 +2,6 @@
 .git/
 *.log
 *.md
+.github
+*.key
+
