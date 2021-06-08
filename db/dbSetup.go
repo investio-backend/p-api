@@ -3,11 +3,13 @@ package db
 import (
 	"fmt"
 	"log"
+	"os"
 	"strconv"
 
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
 	"github.com/influxdata/influxdb-client-go/v2/api"
 
+	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
@@ -23,6 +25,34 @@ type DbConfig struct {
 	User     string
 	DbName   string
 	Password string
+}
+
+func SetupDB() (err error) {
+	MySQL, err = gorm.Open(
+		mysql.Open(
+			MySqlURL(BuildDbConfig(
+				os.Getenv("MYSQL_HOST"),
+				os.Getenv("MYSQL_PORT"),
+				os.Getenv("MYSQL_USER"),
+				os.Getenv("MYSQL_PWD"),
+				os.Getenv("MYSQL_DB"),
+			)),
+		),
+		&gorm.Config{},
+	)
+
+	if err != nil {
+		log.Fatalln("Database Init error: ", err)
+	} else {
+		// db.MySQL.AutoMigrate(&model.Fund{})
+
+		InfluxClient = influxdb2.NewClient(
+			os.Getenv("INFLUX_HOST"),
+			os.Getenv("INFLUX_TOKEN"),
+		)
+		InfluxQuery = InfluxClient.QueryAPI(os.Getenv("INFLUX_ORG"))
+	}
+	return
 }
 
 func BuildDbConfig(host string, port string, user, pwd, dbName string) *DbConfig {

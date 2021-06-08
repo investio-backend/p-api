@@ -7,18 +7,12 @@ import (
 	_ "time/tzdata"
 
 	"github.com/gin-gonic/gin"
-	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
-	"gorm.io/driver/mysql"
 
 	"github.com/gin-contrib/cors"
 	"github.com/joho/godotenv"
 	"gitlab.com/investio/backend/api/db"
 	"gitlab.com/investio/backend/api/v1/controller"
-	"gitlab.com/investio/backend/api/v1/model"
 	"gitlab.com/investio/backend/api/v1/service"
-
-	// "gopkg.in/olahol/melody.v1"
-	"gorm.io/gorm"
 )
 
 var (
@@ -36,34 +30,6 @@ var (
 	// wsController controller.SocketController = controller.NewSocketController(ws, fundController)
 )
 
-func setupDB() (err error) {
-	db.MySQL, err = gorm.Open(
-		mysql.Open(
-			db.MySqlURL(db.BuildDbConfig(
-				os.Getenv("MYSQL_HOST"),
-				os.Getenv("MYSQL_PORT"),
-				os.Getenv("MYSQL_USER"),
-				os.Getenv("MYSQL_PWD"),
-				os.Getenv("MYSQL_DB"),
-			)),
-		),
-		&gorm.Config{},
-	)
-
-	if err != nil {
-		log.Fatalln("Database Init error: ", err)
-	} else {
-		db.MySQL.AutoMigrate(&model.Fund{})
-
-		db.InfluxClient = influxdb2.NewClient(
-			os.Getenv("INFLUX_HOST"),
-			os.Getenv("INFLUX_TOKEN"),
-		)
-		db.InfluxQuery = db.InfluxClient.QueryAPI(os.Getenv("INFLUX_ORG"))
-	}
-	return
-}
-
 func main() {
 	var err error
 	if os.Getenv("GIN_MODE") != "release" {
@@ -74,7 +40,7 @@ func main() {
 		}
 	}
 
-	err = setupDB()
+	err = db.SetupDB()
 	if err != nil {
 		log.Fatal("Fail to connect to DB: ", err.Error())
 		return
