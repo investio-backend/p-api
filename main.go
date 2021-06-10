@@ -34,7 +34,7 @@ var (
 
 func getVersion(ctx *gin.Context) {
 	ctx.JSON(200, gin.H{
-		"version": "1.1.0",
+		"version": "1.1.1",
 	})
 }
 
@@ -81,7 +81,10 @@ func main() {
 			f.GET("/search/:fundQuery", fundController.SearchFund)
 			f.GET("/top/return", statController.GetTopReturn)
 			f.GET("/stat/:fundID", statController.GetStatInfo)
+
 		}
+		v1.GET("/predict", predictController.GetTopPredict)
+		v1.POST("/predict", predictController.AddPredict)
 
 		// ws := v1.Group("/ws")
 		// {
@@ -94,8 +97,6 @@ func main() {
 		internalV1.GET("/index/set", navController.GetPastSetIndex)
 		internalV1.GET("/nav/series/ast", navController.GetPastNavWithAsset)
 		internalV1.GET("/predict/scope", fundController.ListPredictScope)
-		internalV1.GET("/predict", predictController.GetTopPredict)
-		internalV1.POST("/predict", predictController.AddPredict)
 	}
 
 	v1.GET("/ver", getVersion)
