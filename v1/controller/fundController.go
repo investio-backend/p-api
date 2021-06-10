@@ -18,6 +18,7 @@ type FundController interface {
 	GetFundByID(ctx *gin.Context)
 	ListCat(ctx *gin.Context)
 	ListAmc(ctx *gin.Context)
+	ListPredictScope(ctx *gin.Context)
 	// GetAllFund(ctx *gin.Context)
 	SearchFund(ctx *gin.Context)
 	SocketSearchFund(reqJSON dto.SocketDTO) (response []byte)
@@ -100,13 +101,25 @@ func (c *fundController) ListCat(ctx *gin.Context) {
 	if err := c.fundService.GetAllCat(&catList); err == nil {
 		ctx.JSON(http.StatusOK, catList)
 	} else {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, err.Error())
+		ctx.AbortWithStatusJSON(http.StatusBadGateway, err.Error())
 	}
 }
 
 func (c *fundController) ListAmc(ctx *gin.Context) {
 	var amcList []model.Amc
-	if err := c.fundService.GetAllAmc(&amcList); err == nil {
+	if err := c.fundService.GetAllAmc(&amcList); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadGateway, err.Error())
+	} else {
 		ctx.JSON(http.StatusOK, amcList)
+	}
+}
+
+func (c *fundController) ListPredictScope(ctx *gin.Context) {
+	var scopeList []model.FundScopeResponse
+
+	if err := c.fundService.GetAllFundScope(&scopeList); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadGateway, err.Error())
+	} else {
+		ctx.JSON(http.StatusOK, scopeList)
 	}
 }

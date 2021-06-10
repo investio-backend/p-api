@@ -8,6 +8,7 @@ import (
 
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
 	"github.com/influxdata/influxdb-client-go/v2/api"
+	"gitlab.com/investio/backend/api/v1/model"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -44,7 +45,7 @@ func SetupDB() (err error) {
 	if err != nil {
 		log.Fatalln("Database Init error: ", err)
 	} else {
-		// db.MySQL.AutoMigrate(&model.Fund{})
+		MySQL.AutoMigrate(&model.PredictBuy{})
 
 		InfluxClient = influxdb2.NewClient(
 			os.Getenv("INFLUX_HOST"),

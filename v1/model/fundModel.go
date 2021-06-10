@@ -81,7 +81,17 @@ func (FundSearchResponse) TableName() string {
 	return "fund"
 }
 
-// // TableName fund
-// func (FundAllInfo) TableName() string {
-// 	return "fund"
-// }
+type FundScopeResponse struct {
+	ID         uint16 `json:"fiid"`
+	FundID     string `json:"fund_id"`
+	Code       string `json:"code"`
+	NameEn     string `json:"name_en"`
+	NameTh     string `json:"name_th"`
+	IsPredict  bool   `json:"-"`
+	IsTradable bool   `json:"-"`
+}
+
+// TableName fund
+func (FundScopeResponse) TableName() string {
+	return "fund"
+}

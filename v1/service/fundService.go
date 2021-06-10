@@ -14,6 +14,7 @@ type FundService interface {
 	GetAllAmc(amc *[]model.Amc) (err error)
 	GetFundInfoByID(results *model.FundInfoResponse, fundID string) error
 	SearchFund(query string, limit int) (result []model.FundSearchResponse, err error)
+	GetAllFundScope(scopes *[]model.FundScopeResponse) (err error)
 }
 
 type fundService struct {
@@ -115,4 +116,9 @@ func (service *fundService) searchFundByNameTH(funds *[]model.FundSearchResponse
 		return err
 	}
 	return nil
+}
+
+func (service *fundService) GetAllFundScope(scopes *[]model.FundScopeResponse) (err error) {
+	err = db.MySQL.Where("is_predict = ?", true).Where("is_tradable = ?", true).Find(&scopes).Error
+	return
 }

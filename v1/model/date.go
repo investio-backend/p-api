@@ -26,3 +26,8 @@ func (d *Date) UnmarshalJSON(b []byte) error {
 func (d Date) MarshalJSON() ([]byte, error) {
 	return []byte(time.Time(d).Format(`"2006-01-02"`)), nil
 }
+
+func (d Date) ParseTime() (date time.Time) {
+	date, _ = time.Parse("2006-01-02", d.String())
+	return
+}

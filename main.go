@@ -18,17 +18,25 @@ import (
 var (
 	thaiRegEx, _ = regexp.Compile("([\u0E00-\u0E7F]+)")
 
-	fundService service.FundService = service.NewFundService(thaiRegEx)
-	navService  service.NavService  = service.NewNavService()
-	statService service.StatService = service.NewStatService()
+	fundService    service.FundService    = service.NewFundService(thaiRegEx)
+	navService     service.NavService     = service.NewNavService()
+	statService    service.StatService    = service.NewStatService()
+	predictService service.PredictService = service.NewPredictService()
 
-	fundController controller.FundController = controller.NewFundController(fundService)
-	navController  controller.NavController  = controller.NewNavController(navService)
-	statController controller.StatController = controller.NewStatController(statService)
+	fundController    controller.FundController    = controller.NewFundController(fundService)
+	navController     controller.NavController     = controller.NewNavController(navService)
+	statController    controller.StatController    = controller.NewStatController(statService)
+	predictController controller.PredictController = controller.NewPredictController(predictService)
 
 	// ws           *melody.Melody              = melody.New()
 	// wsController controller.SocketController = controller.NewSocketController(ws, fundController)
 )
+
+func getVersion(ctx *gin.Context) {
+	ctx.JSON(200, gin.H{
+		"version": "1.1.0",
+	})
+}
 
 func main() {
 	var err error
@@ -85,7 +93,12 @@ func main() {
 	{
 		internalV1.GET("/index/set", navController.GetPastSetIndex)
 		internalV1.GET("/nav/series/ast", navController.GetPastNavWithAsset)
+		internalV1.GET("/predict/scope", fundController.ListPredictScope)
+		internalV1.GET("/predict", predictController.GetTopPredict)
+		internalV1.POST("/predict", predictController.AddPredict)
 	}
+
+	v1.GET("/ver", getVersion)
 
 	port := os.Getenv("API_PORT")
 	if port == "" {
