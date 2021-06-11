@@ -67,6 +67,8 @@ type FundInfoResponse struct {
 	CatNameEn         string `json:"cat_name_en"`
 	CatNameTh         string `json:"cat_name_th"`
 	RiskID            uint32 `json:"risk_id"`
+	SpectrumEn        string `json:"risk_en"`
+	SpectrumTh        string `json:"risk_th"`
 	RiskExID          uint32 `json:"risk_exchange_id"`
 	TaxTypeID         uint32 `json:"tax_type_id"`
 }

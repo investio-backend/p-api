@@ -65,7 +65,7 @@ func (service *fundService) GetFundInfoByID(results *model.FundInfoResponse, fun
 	selectStr := `fund.fund_id, fund.code, fund.name_en, fund.name_th, fund.is_predict, fund.is_dividend_payout, fund.is_tradable,
 					fund.factsheet_url, fund.prospectus_url, fund.halfyear_report_url, fund.annual_report_url, 
 					fund.invest_strategy_en, fund.invest_strategy_th, fund.short_desc_en, fund.short_desc_th, fund.aimc_brd_cat_id,
-					fund.inception_date, aimc_cat.cat_id, aimc_cat.cat_name_en, aimc_cat.cat_name_th,
+					fund.inception_date, aimc_cat.cat_id, aimc_cat.cat_name_en, aimc_cat.cat_name_th, risk.spectrum_th, risk.spectrum_en,
 					amc.amc_code, amc.amc_name_en, amc.amc_name_th, fund.risk_id, fund.risk_ex_id, fund.tax_type_id`
 	// selectQuery := ""
 	// query := db.Model(&model.Fund{}).Select(selectQuery).Joins()
@@ -78,7 +78,7 @@ func (service *fundService) GetFundInfoByID(results *model.FundInfoResponse, fun
 
 	// selectQ := `fund`
 
-	err = db.MySQL.Model(&model.Fund{}).Select(selectStr).Joins("join aimc_cat on fund.aimc_cat_id = aimc_cat.id").Joins("join amc on fund.amc_id = amc.id").First(&results, "fund.fund_id = ?", fundID).Error
+	err = db.MySQL.Model(&model.Fund{}).Select(selectStr).Joins("join aimc_cat on fund.aimc_cat_id = aimc_cat.id").Joins("join amc on fund.amc_id = amc.id").Joins("join risk on fund.risk_id = risk.id").First(&results, "fund.fund_id = ?", fundID).Error
 	return
 }
 
