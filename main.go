@@ -34,7 +34,7 @@ var (
 
 func getVersion(ctx *gin.Context) {
 	ctx.JSON(200, gin.H{
-		"version": "1.2.0",
+		"version": "1.2.1",
 	})
 }
 

@@ -40,6 +40,14 @@ func (c *statController) GetTopReturn(ctx *gin.Context) {
 		}
 	}
 
+	if queryStr.Risk == 0 {
+		queryStr.Risk = 10
+	}
+
+	if queryStr.Range == "" {
+		queryStr.Range = "1y"
+	}
+
 	if err := c.statService.FindTopStat(&results, queryStr); err != nil {
 		ctx.AbortWithStatus(http.StatusBadRequest)
 		return
