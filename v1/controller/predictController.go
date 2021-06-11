@@ -25,9 +25,25 @@ func NewPredictController(predict service.PredictService) PredictController {
 	}
 }
 
+type queryTopPredict struct {
+	Risk uint
+}
+
 func (c *predictController) GetTopPredict(ctx *gin.Context) {
-	var results []model.PredictBuyResponse
-	if err := c.predictService.ReadTopResult(&results); err != nil {
+	var (
+		queryStr queryTopPredict
+		results  []model.PredictBuyResponse
+	)
+
+	if ctx.ShouldBind(&queryStr) != nil {
+		queryStr = queryTopPredict{
+			Risk: 9,
+		}
+	}
+	if queryStr.Risk == 0 {
+		queryStr.Risk = 9
+	}
+	if err := c.predictService.ReadTopResult(&results, queryStr.Risk); err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadGateway, err.Error())
 	}
 	ctx.JSON(http.StatusOK, results)
