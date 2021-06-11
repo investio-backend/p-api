@@ -12,7 +12,7 @@ type PredictBuy struct {
 	FundCode  string          `json:"fund_code"`
 	Fiid      uint            `json:"-"`
 	DataDate  time.Time       `json:"data_date" gorm:"type:date;"`
-	Prob      decimal.Decimal `json:"buy_prob"`
+	Prob      decimal.Decimal `json:"buy_prob" gorm:"type:decimal(7,4);"`
 	CreatedAt time.Time       `json:"timestamp"`
 	UpdatedAt time.Time       `json:"-"`
 	DeletedAt gorm.DeletedAt  `gorm:"index" json:"-"`
