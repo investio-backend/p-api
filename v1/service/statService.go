@@ -2,6 +2,7 @@ package service
 
 import (
 	"gitlab.com/investio/backend/api/db"
+	"gitlab.com/investio/backend/api/v1/dto"
 	"gitlab.com/investio/backend/api/v1/model"
 )
 
@@ -9,6 +10,7 @@ type StatService interface {
 	FindTopStat1Y(stats *[]model.Stat_1Y, catID string, amcCode string) (err error)
 	FindTopStat6M(stats *[]model.Stat_6M, catID string, amcCode string) (err error)
 	GetStatByFundID(results *model.StatFundResponse, fundID string) (err error)
+	FindTopStat(topResult *[]model.StatTopResponse, query dto.QueryStrTopReturn) (err error)
 }
 
 type statService struct {
@@ -62,6 +64,46 @@ func (service *statService) FindTopStat6M(result *[]model.Stat_6M, catID string,
 	}
 
 	if err = query.Scan(&result).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (service *statService) FindTopStat(topResult *[]model.StatTopResponse, params dto.QueryStrTopReturn) (err error) {
+	var orderBy string
+	selectQuery := `stat.*, fund.code, fund.fund_id, fund.name_en, fund.name_th, aimc_cat.cat_name_en, 
+		aimc_cat.cat_name_th, amc.amc_code, amc.amc_name_en, amc.amc_name_th, fund.risk_id`
+
+	query := db.MySQL.Model(&model.Stat{}).Limit(50)
+
+	if params.Range == "3m" {
+		orderBy = "total_return_3m desc"
+		query.Where("stat.total_return_3m > ?", 0)
+	} else if params.Range == "6m" {
+		orderBy = "total_return_6m desc"
+		query.Where("stat.total_return_6m > ?", 0)
+	} else if params.Range == "1y" {
+		orderBy = "total_return_1y desc"
+		query.Where("stat.total_return_1y > ?", 0)
+	} else if params.Range == "3y" {
+		orderBy = "total_return_3y desc"
+		query.Where("stat.total_return_3y > ?", 0)
+	} else {
+		orderBy = "total_return_1y desc"
+	}
+
+	query = query.Order(orderBy).Select(selectQuery)
+	query = query.Joins("join fund on stat.id = fund.stat_id").Joins("join aimc_cat on fund.aimc_cat_id = aimc_cat.id").Joins("join amc on fund.amc_id = amc.id")
+
+	if params.Cat != "" {
+		query = query.Where("cat_id = ?", params.Cat)
+	}
+
+	if params.Amc != "" {
+		query = query.Where("amc_code = ?", params.Amc)
+	}
+
+	if err = query.Where("fund.risk_id <= ?", params.Risk).Scan(&topResult).Error; err != nil {
 		return err
 	}
 	return nil
